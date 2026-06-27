@@ -728,6 +728,69 @@ select:focus-visible {
   background: #fff7ed;
 }
 
+.tag-list .price-paid,
+.price-paid {
+  border-color: rgba(118, 82, 163, 0.28);
+  color: var(--violet);
+  background: #f7f3fb;
+}
+
+.course-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.priority-badge,
+.source-type-badge,
+.source-type-inline,
+.access-inline {
+  display: inline-flex;
+  width: max-content;
+  max-width: 100%;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: var(--muted);
+  background: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.priority-badge {
+  margin-top: 6px;
+}
+
+.priority-p0 {
+  border-color: rgba(15, 143, 131, 0.28);
+  color: var(--teal);
+  background: #eef9f7;
+}
+
+.priority-p1 {
+  border-color: rgba(239, 170, 52, 0.38);
+  color: #8a5a07;
+  background: #fff8e7;
+}
+
+.priority-p2 {
+  border-color: rgba(95, 111, 127, 0.24);
+  color: #5f6f7f;
+  background: #f5f8fa;
+}
+
+.source-type-inline {
+  display: flex;
+  margin-top: 6px;
+}
+
+.access-inline {
+  margin-top: 7px;
+}
+
 .course-card-grid,
 .mobile-course-cards {
   display: grid;

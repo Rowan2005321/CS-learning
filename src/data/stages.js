@@ -61,5 +61,26 @@ export const stages = [
     track: "interview-prep",
     icon: "list",
     weeks: "48+"
+  },
+  {
+    id: "vibe-coding",
+    discipline: "software-engineering",
+    track: "ai-assisted-software-engineering",
+    icon: "sparkles",
+    weeks: "4-20"
+  },
+  {
+    id: "agent-engineering",
+    discipline: "ai-agents",
+    track: "agent-engineering",
+    icon: "bot",
+    weeks: "8-40"
+  },
+  {
+    id: "blockchain-web3",
+    discipline: "blockchain",
+    track: "blockchain-web3",
+    icon: "blocks",
+    weeks: "8-36"
   }
 ];

@@ -7,7 +7,7 @@ describe("calculateProgress", () => {
     expect(calculateProgress(courses, ["cs50x", "cs229"])).toEqual({
       completed: 2,
       total: courses.length,
-      percent: 20
+      percent: Math.round((2 / courses.length) * 100)
     });
   });
 

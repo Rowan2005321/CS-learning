@@ -49,6 +49,12 @@ export const labels = {
     courseAudience: "Best for",
     courseOutcomes: "What you can do after",
     coursePrerequisites: "Prerequisites",
+    courseUniversity: "University",
+    courseAccess: "Access",
+    courseSourceType: "Source type",
+    courseOutputTask: "Suggested output",
+    priority: "Priority",
+    paidProfessional: "Paid / professional",
     officialLink: "Official link",
     free: "Free",
     partialPaid: "Partly paid",
@@ -57,6 +63,7 @@ export const labels = {
     markDone: "Mark completed",
     markUndone: "Mark not completed",
     levels: {
+      beginner: "Beginner",
       intro: "Intro",
       foundation: "Foundational",
       intermediate: "Intermediate",
@@ -70,14 +77,40 @@ export const labels = {
       ai: "AI",
       data: "Data",
       security: "Security",
-      engineering: "Software Engineering"
+      engineering: "Software Engineering",
+      "software-engineering": "Software Engineering",
+      "web-development": "Web Development",
+      "ai-engineering": "AI Engineering",
+      "artificial-intelligence": "Artificial Intelligence",
+      "deep-learning": "Deep Learning",
+      "large-language-models": "Large Language Models",
+      "natural-language-processing": "Natural Language Processing",
+      "ai-agents": "AI Agents",
+      blockchain: "Blockchain / Web3"
     },
     tracks: {
       foundations: "Foundations",
       systems: "Systems",
       "ai-data": "AI & Data",
       "software-engineering": "Software Engineering",
-      "interview-prep": "Interview Prep"
+      "interview-prep": "Interview Prep",
+      "ai-assisted-software-engineering": "AI-Assisted Software Engineering / Vibe Coding",
+      "agent-engineering": "AI Agent Engineering",
+      "blockchain-web3": "Blockchain / Web3 / DeFi"
+    },
+    priorityLabels: {
+      P0: "Core route",
+      P1: "Recommended supplement",
+      P2: "Optional resource"
+    },
+    sourceTypes: {
+      "official-ocw": "Official OCW",
+      "official-course-site": "Official course site",
+      "official-online-course": "Official online course",
+      "official-professional-course": "Official professional course",
+      "practical-short-course": "Practical short course",
+      "university-student-org-mooc": "University student org MOOC",
+      "official-seminar-site": "Official seminar site"
     },
     stageTitles: {
       foundations: "Foundations",
@@ -88,7 +121,10 @@ export const labels = {
       theory: "Theory",
       security: "Security",
       engineering: "Software Engineering",
-      interview: "Interview Prep"
+      interview: "Interview Prep",
+      "vibe-coding": "AI-Assisted Software Engineering",
+      "agent-engineering": "AI Agent Engineering",
+      "blockchain-web3": "Blockchain / Web3"
     }
   },
   zh: {
@@ -139,6 +175,12 @@ export const labels = {
     courseAudience: "适合人群",
     courseOutcomes: "学完能做什么",
     coursePrerequisites: "前置知识",
+    courseUniversity: "学校 / 机构",
+    courseAccess: "访问方式",
+    courseSourceType: "来源类型",
+    courseOutputTask: "建议产出任务",
+    priority: "优先级",
+    paidProfessional: "付费 / 职业教育",
     officialLink: "官方链接",
     free: "免费",
     partialPaid: "部分付费",
@@ -147,6 +189,7 @@ export const labels = {
     markDone: "标记已完成",
     markUndone: "取消完成",
     levels: {
+      beginner: "新手",
       intro: "入门",
       foundation: "基础",
       intermediate: "进阶",
@@ -160,14 +203,40 @@ export const labels = {
       ai: "人工智能",
       data: "数据",
       security: "安全",
-      engineering: "软件工程"
+      engineering: "软件工程",
+      "software-engineering": "软件工程",
+      "web-development": "Web 开发",
+      "ai-engineering": "AI 工程",
+      "artificial-intelligence": "人工智能",
+      "deep-learning": "深度学习",
+      "large-language-models": "大语言模型",
+      "natural-language-processing": "自然语言处理",
+      "ai-agents": "AI Agent",
+      blockchain: "区块链 / Web3"
     },
     tracks: {
       foundations: "Foundations",
       systems: "Systems",
       "ai-data": "AI & Data",
       "software-engineering": "Software Engineering",
-      "interview-prep": "Interview Prep"
+      "interview-prep": "Interview Prep",
+      "ai-assisted-software-engineering": "AI 辅助软件工程 / Vibe Coding",
+      "agent-engineering": "AI Agent 开发",
+      "blockchain-web3": "区块链 / Web3 / DeFi"
+    },
+    priorityLabels: {
+      P0: "强烈推荐加入主路线",
+      P1: "推荐加入进阶 / 补充路线",
+      P2: "可选补充资源"
+    },
+    sourceTypes: {
+      "official-ocw": "官方 OCW",
+      "official-course-site": "官方课程站点",
+      "official-online-course": "官方在线课程",
+      "official-professional-course": "官方职业教育课程",
+      "practical-short-course": "实践短课",
+      "university-student-org-mooc": "大学学生组织 MOOC",
+      "official-seminar-site": "官方 Seminar 站点"
     },
     stageTitles: {
       foundations: "基础入门",
@@ -178,7 +247,10 @@ export const labels = {
       theory: "理论",
       security: "安全",
       engineering: "软件工程",
-      interview: "面试准备"
+      interview: "面试准备",
+      "vibe-coding": "AI 辅助软件工程",
+      "agent-engineering": "AI Agent 开发",
+      "blockchain-web3": "区块链 / Web3"
     }
   }
 };

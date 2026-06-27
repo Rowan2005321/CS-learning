@@ -1,4 +1,12 @@
 import { Bookmark, BookmarkCheck, CheckCircle2, Circle, ExternalLink } from "lucide-react";
+import {
+  formatCourseDuration,
+  getAccessClass,
+  getAccessLabel,
+  getPriorityLabel,
+  getSourceTypeLabel,
+  localizeField
+} from "../utils/courseDisplay";
 import { CourseCard } from "./CourseCard";
 import { disciplineIcons } from "./icons";
 
@@ -36,6 +44,8 @@ export function CourseTable({
               const Icon = disciplineIcons[course.discipline] || disciplineIcons.programming;
               const isSaved = savedSet.has(course.id);
               const isCompleted = completedSet.has(course.id);
+              const priorityLabel = getPriorityLabel(course, t);
+              const sourceTypeLabel = getSourceTypeLabel(course, t);
 
               return (
                 <tr key={course.id} className={isCompleted ? "is-completed" : ""}>
@@ -45,8 +55,15 @@ export function CourseTable({
                         <Icon size={18} aria-hidden="true" />
                       </span>
                       <div>
-                        <strong>{course.title[lang]}</strong>
-                        <p>{course.description[lang]}</p>
+                        <strong>{localizeField(course.title, lang)}</strong>
+                        {course.priority && (
+                          <span
+                            className={`priority-badge priority-${course.priority.toLowerCase()}`}
+                          >
+                            {course.priority} · {priorityLabel}
+                          </span>
+                        )}
+                        <p>{localizeField(course.description, lang)}</p>
                       </div>
                     </div>
                   </td>
@@ -55,10 +72,19 @@ export function CourseTable({
                       {course.provider}
                       <ExternalLink size={13} aria-hidden="true" />
                     </a>
+                    {course.university && (
+                      <small className="source-type-inline">{course.university}</small>
+                    )}
+                    {sourceTypeLabel && (
+                      <small className="source-type-inline">{sourceTypeLabel}</small>
+                    )}
                   </td>
-                  <td>{t.levels[course.level]}</td>
+                  <td>{t.levels[course.level] ?? course.level}</td>
                   <td>
-                    {course.weeks} {lang === "zh" ? "周" : "weeks"} · {course.hoursPerWeek}h/w
+                    {formatCourseDuration(course, lang)}
+                    <span className={`access-inline ${getAccessClass(course)}`}>
+                      {getAccessLabel(course, t)}
+                    </span>
                   </td>
                   <td>
                     <div className="mini-tags">

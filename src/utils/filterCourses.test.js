@@ -38,4 +38,20 @@ describe("filterCourses", () => {
 
     expect(filterCourses(coursesWithUiState, filters).map((course) => course.id)).toEqual(baseline);
   });
+
+  it("filters the new AI agent and Web3 tracks", () => {
+    const agentCourses = filterCourses(courses, { ...allFilters, track: "agent-engineering" });
+    const web3Courses = filterCourses(courses, { ...allFilters, track: "blockchain-web3" });
+
+    expect(agentCourses.map((course) => course.id)).toContain("berkeley-llm-agents");
+    expect(web3Courses.map((course) => course.id)).toContain(
+      "stanford-cs251-blockchain-technologies"
+    );
+  });
+
+  it("searches enriched metadata fields", () => {
+    const result = filterCourses(courses, { ...allFilters, query: "Fall 2024 course" });
+
+    expect(result.map((course) => course.id)).toContain("berkeley-defi");
+  });
 });

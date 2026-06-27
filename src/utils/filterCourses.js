@@ -7,7 +7,11 @@ export function filterCourses(courses, filters) {
       !needle ||
       [
         course.provider,
+        course.university,
         course.code,
+        course.access,
+        course.sourceType,
+        course.priority,
         course.title.en,
         course.title.zh,
         course.description.en,
@@ -18,6 +22,10 @@ export function filterCourses(courses, filters) {
         course.outcomes.zh,
         course.prerequisites.en,
         course.prerequisites.zh,
+        course.commonPitfallsZh,
+        course.bridgeMaterialsZh,
+        course.outputTaskZh,
+        course.durationNote,
         course.discipline,
         course.level,
         course.language,

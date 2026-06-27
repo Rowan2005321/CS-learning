@@ -1,4 +1,12 @@
 import { Bookmark, BookmarkCheck, CheckCircle2, Circle, ExternalLink } from "lucide-react";
+import {
+  formatCourseDuration,
+  getAccessClass,
+  getAccessLabel,
+  getPriorityLabel,
+  getSourceTypeLabel,
+  localizeField
+} from "../utils/courseDisplay";
 import { disciplineIcons } from "./icons";
 
 export function CourseCard({
@@ -11,42 +19,81 @@ export function CourseCard({
   onToggleCompleted
 }) {
   const Icon = disciplineIcons[course.discipline] || disciplineIcons.programming;
+  const priorityLabel = getPriorityLabel(course, t);
+  const sourceTypeLabel = getSourceTypeLabel(course, t);
+  const title = localizeField(course.title, lang);
+  const description = localizeField(course.description, lang);
+  const audience = localizeField(course.audience, lang);
+  const outcomes = localizeField(course.outcomes, lang);
+  const prerequisites = localizeField(course.prerequisites, lang);
 
   return (
     <article className={`course-card ${isCompleted ? "is-completed" : ""}`}>
+      {(course.priority || sourceTypeLabel) && (
+        <div className="course-meta-row">
+          {course.priority && (
+            <span className={`priority-badge priority-${course.priority.toLowerCase()}`}>
+              {course.priority} · {priorityLabel}
+            </span>
+          )}
+          {sourceTypeLabel && <span className="source-type-badge">{sourceTypeLabel}</span>}
+        </div>
+      )}
+
       <div className="course-card-header">
         <span className="course-icon">
           <Icon size={18} aria-hidden="true" />
         </span>
         <div>
-          <h3>{course.title[lang]}</h3>
+          <h3>{title}</h3>
           <p>
-            {course.provider} · {course.code}
+            {course.provider}
+            {course.university ? ` · ${course.university}` : ""} · {course.code}
           </p>
         </div>
       </div>
 
-      <p className="course-desc">{course.description[lang]}</p>
+      <p className="course-desc">{description}</p>
 
       <dl className="course-details">
+        {course.university && (
+          <div>
+            <dt>{t.courseUniversity}</dt>
+            <dd>{course.university}</dd>
+          </div>
+        )}
         <div>
           <dt>{t.courseAudience}</dt>
-          <dd>{course.audience[lang]}</dd>
+          <dd>{audience}</dd>
         </div>
         <div>
           <dt>{t.courseOutcomes}</dt>
-          <dd>{course.outcomes[lang]}</dd>
+          <dd>{outcomes}</dd>
         </div>
         <div>
           <dt>{t.coursePrerequisites}</dt>
-          <dd>{course.prerequisites[lang]}</dd>
+          <dd>{prerequisites}</dd>
         </div>
         <div>
           <dt>{t.time}</dt>
-          <dd>
-            {course.weeks} {lang === "zh" ? "周" : "weeks"} · {course.hoursPerWeek}h/week
-          </dd>
+          <dd>{formatCourseDuration(course, lang)}</dd>
         </div>
+        {(course.access || sourceTypeLabel) && (
+          <div>
+            <dt>{t.courseAccess}</dt>
+            <dd>
+              {getAccessLabel(course, t)}
+              {course.access ? ` · ${course.access}` : ""}
+              {sourceTypeLabel ? ` · ${sourceTypeLabel}` : ""}
+            </dd>
+          </div>
+        )}
+        {course.outputTaskZh && (
+          <div>
+            <dt>{t.courseOutputTask}</dt>
+            <dd>{course.outputTaskZh}</dd>
+          </div>
+        )}
       </dl>
 
       <div className="tag-list">
@@ -54,9 +101,7 @@ export function CourseCard({
           <span key={tag}>{tag}</span>
         ))}
         <span>{course.language}</span>
-        <span className={course.isFree ? "price-free" : "price-partial"}>
-          {course.isFree ? t.free : t.partialPaid}
-        </span>
+        <span className={getAccessClass(course)}>{getAccessLabel(course, t)}</span>
       </div>
 
       <div className="course-actions">
