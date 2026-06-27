@@ -372,8 +372,13 @@ textarea:focus-visible {
 .discipline-section,
 .projects-section,
 .sources-section {
+  scroll-margin-top: 82px;
   padding: 30px clamp(20px, 5vw, 72px);
   border-bottom: 1px solid var(--line);
+}
+
+.hero-section {
+  scroll-margin-top: 82px;
 }
 
 .section-heading {

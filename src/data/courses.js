@@ -298,7 +298,7 @@ export const courses = [
   },
   {
     id: "fullstackopen",
-    discipline: "engineering",
+    discipline: "software-engineering",
     level: "intermediate",
     tracks: ["software-engineering"],
     provider: "Full Stack Open",
@@ -594,7 +594,7 @@ export const courses = [
   },
   {
     id: "mit-6s087-foundation-models-generative-ai",
-    discipline: "artificial-intelligence",
+    discipline: "ai",
     level: "beginner",
     tracks: ["agent-engineering", "ai-assisted-software-engineering"],
     provider: "MIT OpenCourseWare",
@@ -692,7 +692,7 @@ export const courses = [
   },
   {
     id: "mit-mas-s60-how-to-ai-almost-anything",
-    discipline: "artificial-intelligence",
+    discipline: "ai",
     level: "advanced",
     tracks: ["agent-engineering"],
     provider: "MIT OpenCourseWare",
@@ -736,7 +736,7 @@ export const courses = [
   },
   {
     id: "harvard-cs50ai-python",
-    discipline: "artificial-intelligence",
+    discipline: "ai",
     level: "intermediate",
     tracks: ["agent-engineering"],
     provider: "Harvard CS50",

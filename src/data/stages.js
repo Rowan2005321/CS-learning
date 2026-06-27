@@ -43,7 +43,7 @@ export const stages = [
   },
   {
     id: "engineering",
-    discipline: "engineering",
+    discipline: "software-engineering",
     track: "software-engineering",
     icon: "wrench",
     weeks: "32-52"

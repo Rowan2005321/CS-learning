@@ -31,6 +31,24 @@ function scrollToCourses() {
   });
 }
 
+function scrollToHashTarget(behavior = "auto") {
+  if (typeof window === "undefined") return;
+
+  let id = window.location.hash.replace(/^#/, "");
+  try {
+    id = decodeURIComponent(id);
+  } catch {
+    // Keep the raw hash when it is not a valid encoded fragment.
+  }
+
+  if (!id) return;
+
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  target.scrollIntoView({ behavior, block: "start" });
+}
+
 function readInitialLanguage() {
   if (typeof window === "undefined") return "zh";
 
@@ -71,6 +89,21 @@ function App() {
 
   useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  }, [lang]);
+
+  useEffect(() => {
+    const scrollAfterRender = () => {
+      window.requestAnimationFrame(() => scrollToHashTarget());
+    };
+
+    scrollAfterRender();
+    window.addEventListener("hashchange", scrollAfterRender);
+
+    return () => window.removeEventListener("hashchange", scrollAfterRender);
+  }, []);
+
+  useEffect(() => {
+    window.requestAnimationFrame(() => scrollToHashTarget());
   }, [lang]);
 
   function changeLanguage(nextLang) {
