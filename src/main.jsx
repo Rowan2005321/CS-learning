@@ -19,6 +19,11 @@ import { stages } from "./data/stages";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { filterCourses } from "./utils/filterCourses";
 import { calculateProgress, estimateWeeks } from "./utils/progress";
+import {
+  createStudyLogState,
+  mergeStudyLogEntries,
+  migrateStudyLogState
+} from "./utils/studyLog";
 import "./styles.css";
 
 function toggleId(list, id) {
@@ -76,7 +81,10 @@ function App() {
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
   const [weeklyHours, setWeeklyHours] = useLocalStorage("open-cs-atlas-weekly-hours", 8);
   const [viewMode, setViewMode] = useLocalStorage("open-cs-atlas-view-mode", "table");
-  const [studyLogs, setStudyLogs] = useLocalStorage("open-cs-atlas-study-logs", []);
+  const [studyLogState, setStudyLogState] = useLocalStorage(
+    "open-cs-atlas-study-logs",
+    createStudyLogState()
+  );
   const [filters, setFilters] = useState({
     query: "",
     discipline: "all",
@@ -126,6 +134,17 @@ function App() {
   const sources = useMemo(() => [...new Set(courses.map((course) => course.provider))], []);
   const savedSet = useMemo(() => new Set(savedIds), [savedIds]);
   const completedSet = useMemo(() => new Set(completedIds), [completedIds]);
+  const normalizedStudyLogState = useMemo(
+    () => migrateStudyLogState(studyLogState),
+    [studyLogState]
+  );
+  const studyLogs = normalizedStudyLogState.entries;
+
+  useEffect(() => {
+    if (JSON.stringify(studyLogState) !== JSON.stringify(normalizedStudyLogState)) {
+      setStudyLogState(normalizedStudyLogState);
+    }
+  }, [normalizedStudyLogState, setStudyLogState, studyLogState]);
 
   function updateFilter(key, value) {
     setFilters((current) => ({ ...current, [key]: value }));
@@ -151,11 +170,24 @@ function App() {
   }
 
   function addStudyLog(entry) {
-    setStudyLogs((current) => [entry, ...current].slice(0, 180));
+    setStudyLogState((current) => {
+      const migrated = migrateStudyLogState(current);
+      return createStudyLogState([entry, ...migrated.entries].slice(0, 1000));
+    });
   }
 
   function deleteStudyLog(id) {
-    setStudyLogs((current) => current.filter((entry) => entry.id !== id));
+    setStudyLogState((current) => {
+      const migrated = migrateStudyLogState(current);
+      return createStudyLogState(migrated.entries.filter((entry) => entry.id !== id));
+    });
+  }
+
+  function importStudyLogs(entries) {
+    setStudyLogState((current) => {
+      const migrated = migrateStudyLogState(current);
+      return createStudyLogState(mergeStudyLogEntries(migrated.entries, entries).slice(0, 1000));
+    });
   }
 
   return (
@@ -254,6 +286,7 @@ function App() {
           t={t}
           onAddLog={addStudyLog}
           onDeleteLog={deleteStudyLog}
+          onImportLogs={importStudyLogs}
         />
         <DisciplineMap
           t={t}

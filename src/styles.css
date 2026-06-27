@@ -949,6 +949,30 @@ textarea:focus-visible {
   line-height: 1.6;
 }
 
+.study-log-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.study-log-actions .button {
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.file-button {
+  cursor: pointer;
+}
+
+.study-log-import-status {
+  margin-top: 10px !important;
+  color: var(--teal) !important;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .eyebrow {
   color: var(--teal);
   font-size: 12px;
@@ -992,6 +1016,87 @@ textarea:focus-visible {
   display: grid;
   grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.05fr);
   gap: 18px;
+}
+
+.study-log-review-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.study-log-review-grid article,
+.study-log-heatmap {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.study-log-review-grid h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.study-log-review-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--teal);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.study-log-review-grid p,
+.study-log-review-grid small {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.study-log-review-grid small {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.weekly-review-card {
+  grid-column: span 1;
+}
+
+.study-log-heatmap {
+  margin-bottom: 18px;
+}
+
+.study-heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(18px, 1fr));
+  gap: 6px;
+}
+
+.heatmap-day {
+  display: block;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid rgba(15, 32, 51, 0.06);
+  border-radius: 5px;
+  background: #edf1f4;
+}
+
+.heatmap-level-1 {
+  background: #d9f0ec;
+}
+
+.heatmap-level-2 {
+  background: #a9ddd5;
+}
+
+.heatmap-level-3 {
+  background: #55b9ad;
+}
+
+.heatmap-level-4 {
+  background: var(--teal);
 }
 
 .study-log-form,
@@ -1285,7 +1390,8 @@ textarea:focus-visible {
   }
 
   .study-log-intro,
-  .study-log-grid {
+  .study-log-grid,
+  .study-log-review-grid {
     grid-template-columns: 1fr;
   }
 
