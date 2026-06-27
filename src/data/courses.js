@@ -1,3 +1,5 @@
+import { advancedSpecialtyCourses } from "./advancedSpecialtyCourses.js";
+
 export const tracks = [
   "foundations",
   "systems",
@@ -6,7 +8,11 @@ export const tracks = [
   "interview-prep",
   "ai-assisted-software-engineering",
   "agent-engineering",
-  "blockchain-web3"
+  "blockchain-web3",
+  "llm-systems-rag-evaluation",
+  "solidity-security-auditing",
+  "onchain-data-analytics",
+  "ai-coding-agent-evaluation-tools"
 ];
 
 export const courses = [
@@ -1435,5 +1441,6 @@ export const courses = [
       "完成一份 Web3 入门学习笔记，并整理术语表：wallet、address、transaction、block、consensus、smart contract。",
     lastChecked: "2026-06-27",
     tags: ["blockchain", "web3", "mooc", "berkeley", "cryptocurrency"]
-  }
+  },
+  ...advancedSpecialtyCourses
 ];

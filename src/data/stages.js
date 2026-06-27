@@ -82,5 +82,33 @@ export const stages = [
     track: "blockchain-web3",
     icon: "blocks",
     weeks: "8-36"
+  },
+  {
+    id: "llm-systems-rag",
+    discipline: "large-language-models",
+    track: "llm-systems-rag-evaluation",
+    icon: "database",
+    weeks: "12-32"
+  },
+  {
+    id: "smart-contract-security",
+    discipline: "security",
+    track: "solidity-security-auditing",
+    icon: "shield",
+    weeks: "12-36"
+  },
+  {
+    id: "onchain-analytics",
+    discipline: "data",
+    track: "onchain-data-analytics",
+    icon: "database",
+    weeks: "6-24"
+  },
+  {
+    id: "ai-coding-agent-tooling",
+    discipline: "software-engineering",
+    track: "ai-coding-agent-evaluation-tools",
+    icon: "sparkles",
+    weeks: "8-28"
   }
 ];

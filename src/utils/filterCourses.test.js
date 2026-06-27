@@ -11,7 +11,7 @@ const allFilters = {
 
 describe("filterCourses", () => {
   it("filters courses by search query", () => {
-    const result = filterCourses(courses, { ...allFilters, query: "CS229" });
+    const result = filterCourses(courses, { ...allFilters, query: "classical ML models" });
 
     expect(result.map((course) => course.id)).toEqual(["cs229"]);
   });
@@ -47,6 +47,30 @@ describe("filterCourses", () => {
     expect(web3Courses.map((course) => course.id)).toContain(
       "stanford-cs251-blockchain-technologies"
     );
+  });
+
+  it("filters advanced specialty tracks", () => {
+    const llmSystems = filterCourses(courses, {
+      ...allFilters,
+      track: "llm-systems-rag-evaluation"
+    });
+    const soliditySecurity = filterCourses(courses, {
+      ...allFilters,
+      track: "solidity-security-auditing"
+    });
+    const onchainAnalytics = filterCourses(courses, {
+      ...allFilters,
+      track: "onchain-data-analytics"
+    });
+    const codingAgents = filterCourses(courses, {
+      ...allFilters,
+      track: "ai-coding-agent-evaluation-tools"
+    });
+
+    expect(llmSystems.map((course) => course.id)).toContain("ragas-rag-evaluation");
+    expect(soliditySecurity.map((course) => course.id)).toContain("trail-of-bits-secure-contracts");
+    expect(onchainAnalytics.map((course) => course.id)).toContain("dune-docs-dunesql");
+    expect(codingAgents.map((course) => course.id)).toContain("swe-bench-benchmark");
   });
 
   it("searches enriched metadata fields", () => {

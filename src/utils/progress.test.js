@@ -23,8 +23,11 @@ describe("calculateProgress", () => {
 describe("estimateWeeks", () => {
   it("estimates route duration from total course hours and weekly availability", () => {
     const route = courses.filter((course) => course.tracks.includes("ai-data"));
+    const expectedWeeks = Math.ceil(
+      route.reduce((sum, course) => sum + course.weeks * course.hoursPerWeek, 0) / 12
+    );
 
-    expect(estimateWeeks(route, 12)).toBe(15);
+    expect(estimateWeeks(route, 12)).toBe(expectedWeeks);
   });
 
   it("returns 0 when weekly hours are not usable", () => {

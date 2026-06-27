@@ -96,7 +96,11 @@ export const labels = {
       "interview-prep": "Interview Prep",
       "ai-assisted-software-engineering": "AI-Assisted Software Engineering / Vibe Coding",
       "agent-engineering": "AI Agent Engineering",
-      "blockchain-web3": "Blockchain / Web3 / DeFi"
+      "blockchain-web3": "Blockchain / Web3 / DeFi",
+      "llm-systems-rag-evaluation": "LLM Systems / RAG Evaluation",
+      "solidity-security-auditing": "Solidity Security / Smart Contract Auditing",
+      "onchain-data-analytics": "On-chain Data Analytics",
+      "ai-coding-agent-evaluation-tools": "AI Coding Agent Evaluation & Tooling"
     },
     priorityLabels: {
       P0: "Core route",
@@ -110,7 +114,15 @@ export const labels = {
       "official-professional-course": "Official professional course",
       "practical-short-course": "Practical short course",
       "university-student-org-mooc": "University student org MOOC",
-      "official-seminar-site": "Official seminar site"
+      "official-seminar-site": "Official seminar site",
+      "official-docs": "Official docs",
+      "official-tool-docs": "Official tool docs",
+      "official-training": "Official training",
+      "open-source-course": "Open-source course",
+      "open-source-framework": "Open-source framework",
+      "framework-docs": "Framework docs",
+      "interactive-lab": "Interactive lab",
+      "benchmark-resource": "Benchmark resource"
     },
     stageTitles: {
       foundations: "Foundations",
@@ -124,7 +136,11 @@ export const labels = {
       interview: "Interview Prep",
       "vibe-coding": "AI-Assisted Software Engineering",
       "agent-engineering": "AI Agent Engineering",
-      "blockchain-web3": "Blockchain / Web3"
+      "blockchain-web3": "Blockchain / Web3",
+      "llm-systems-rag": "LLM Systems / RAG Evaluation",
+      "smart-contract-security": "Smart Contract Security",
+      "onchain-analytics": "On-chain Data Analytics",
+      "ai-coding-agent-tooling": "AI Coding Agent Tooling"
     }
   },
   zh: {
@@ -222,7 +238,11 @@ export const labels = {
       "interview-prep": "Interview Prep",
       "ai-assisted-software-engineering": "AI 辅助软件工程 / Vibe Coding",
       "agent-engineering": "AI Agent 开发",
-      "blockchain-web3": "区块链 / Web3 / DeFi"
+      "blockchain-web3": "区块链 / Web3 / DeFi",
+      "llm-systems-rag-evaluation": "LLM 系统 / RAG 评测",
+      "solidity-security-auditing": "Solidity 安全 / 智能合约审计",
+      "onchain-data-analytics": "链上数据分析",
+      "ai-coding-agent-evaluation-tools": "AI Coding Agent 评测与工具链"
     },
     priorityLabels: {
       P0: "强烈推荐加入主路线",
@@ -236,7 +256,15 @@ export const labels = {
       "official-professional-course": "官方职业教育课程",
       "practical-short-course": "实践短课",
       "university-student-org-mooc": "大学学生组织 MOOC",
-      "official-seminar-site": "官方 Seminar 站点"
+      "official-seminar-site": "官方 Seminar 站点",
+      "official-docs": "官方文档",
+      "official-tool-docs": "官方工具文档",
+      "official-training": "官方训练课程",
+      "open-source-course": "开源课程",
+      "open-source-framework": "开源框架",
+      "framework-docs": "框架文档",
+      "interactive-lab": "互动实验",
+      "benchmark-resource": "评测基准资源"
     },
     stageTitles: {
       foundations: "基础入门",
@@ -250,7 +278,11 @@ export const labels = {
       interview: "面试准备",
       "vibe-coding": "AI 辅助软件工程",
       "agent-engineering": "AI Agent 开发",
-      "blockchain-web3": "区块链 / Web3"
+      "blockchain-web3": "区块链 / Web3",
+      "llm-systems-rag": "LLM 系统 / RAG 评测",
+      "smart-contract-security": "智能合约安全",
+      "onchain-analytics": "链上数据分析",
+      "ai-coding-agent-tooling": "AI Coding Agent 工具链"
     }
   }
 };
