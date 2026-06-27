@@ -3,6 +3,7 @@ import { useState } from "react";
 
 export function Header({ lang, onLanguageChange, t }) {
   const [isOpen, setIsOpen] = useState(false);
+  const navTargets = ["#roadmap", "#courses", "#study-log", "#tracks", "#projects", "#sources"];
 
   return (
     <header className="site-header">
@@ -25,7 +26,7 @@ export function Header({ lang, onLanguageChange, t }) {
         {t.nav.map((item, index) => (
           <a
             key={item}
-            href={["#roadmap", "#courses", "#tracks", "#projects", "#sources"][index]}
+            href={navTargets[index]}
             onClick={() => setIsOpen(false)}
           >
             {item}

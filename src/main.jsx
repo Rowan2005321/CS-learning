@@ -11,6 +11,7 @@ import { Hero } from "./components/Hero";
 import { ProjectMilestones } from "./components/ProjectMilestones";
 import { Roadmap } from "./components/Roadmap";
 import { SourcesSection } from "./components/SourcesSection";
+import { StudyLogPanel } from "./components/StudyLogPanel";
 import { courses, tracks } from "./data/courses";
 import { labels } from "./data/labels";
 import { projects } from "./data/projects";
@@ -51,6 +52,7 @@ function App() {
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
   const [weeklyHours, setWeeklyHours] = useLocalStorage("open-cs-atlas-weekly-hours", 8);
   const [viewMode, setViewMode] = useLocalStorage("open-cs-atlas-view-mode", "table");
+  const [studyLogs, setStudyLogs] = useLocalStorage("open-cs-atlas-study-logs", []);
   const [filters, setFilters] = useState({
     query: "",
     discipline: "all",
@@ -103,6 +105,14 @@ function App() {
   function selectDiscipline(discipline) {
     setFilters((current) => ({ ...current, discipline }));
     scrollToCourses();
+  }
+
+  function addStudyLog(entry) {
+    setStudyLogs((current) => [entry, ...current].slice(0, 180));
+  }
+
+  function deleteStudyLog(id) {
+    setStudyLogs((current) => current.filter((entry) => entry.id !== id));
   }
 
   return (
@@ -195,6 +205,12 @@ function App() {
           </div>
         </section>
 
+        <StudyLogPanel
+          logs={studyLogs}
+          t={t}
+          onAddLog={addStudyLog}
+          onDeleteLog={deleteStudyLog}
+        />
         <DisciplineMap
           t={t}
           activeDiscipline={filters.discipline}

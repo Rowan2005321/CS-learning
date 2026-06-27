@@ -8,6 +8,22 @@ Live site: [Open CS Atlas](https://rowan2005321.github.io/CS-learning/?lang=en) 
 
 > Screenshot placeholder: add a desktop and mobile screenshot after each major UI release. Suggested path: `docs/assets/open-cs-atlas-desktop.png` and `docs/assets/open-cs-atlas-mobile.png`.
 
+## 给 2026 高考后选择计算机科学的同学
+
+如果你刚结束 2026 年高考，正在报考或即将进入计算机科学相关专业，不必因为 AI Agent、自动编程和大模型工具的高速发展而过度焦虑。技术变化越快，越需要扎实的基础、清晰的问题意识和持续动手的能力。
+
+计算机科学不只是“学某个语言”或“追某个热门框架”。它更像一张长期地图：编程、数学、数据结构、系统、网络、数据库、AI、软件工程和安全会互相连接。AI Agent 会改变写代码的方式，但不会替代你理解问题、拆解系统、判断取舍和创造新方向的能力。
+
+给新同学的几句话：
+
+- 不要急着证明自己“会很多工具”，先把基础课、英文阅读和动手项目稳住。
+- 不要被“AI 会不会取代程序员”困住，真正重要的是学会用 AI 放大自己的学习、实验和表达能力。
+- 不要只盯着就业焦虑，大学四年更值得训练的是发散思维、系统思维和把想法做成作品的能力。
+- 找到一个方向持续深入：AI 工程、系统、数据、安全、Web3、开发工具、教育技术都可能长出新的机会。
+- 每天记录一点学习过程，回头看时你会发现，长期进步往往来自稳定的小步推进。
+
+Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把计划变成每天可以执行的行动。
+
 ## Features
 
 - Chinese and English interface.
@@ -17,6 +33,7 @@ Live site: [Open CS Atlas](https://rowan2005321.github.io/CS-learning/?lang=en) 
 - Saved courses and completed courses stored in localStorage.
 - Real progress calculation from completed courses.
 - Study planner that estimates route duration from weekly available hours.
+- Daily study log for recording study hours, notes, outputs, next steps, and streak progress locally.
 - Official direct link for every course.
 - GitHub Pages-ready static deployment.
 
