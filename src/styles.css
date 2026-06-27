@@ -1068,19 +1068,79 @@ textarea:focus-visible {
   margin-bottom: 18px;
 }
 
-.study-heatmap-grid {
+.study-calendar-wrap {
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+
+.study-calendar-months,
+.study-calendar-body {
   display: grid;
-  grid-template-columns: repeat(7, minmax(18px, 1fr));
-  gap: 6px;
+  grid-template-columns: 38px max-content;
+  gap: 8px;
+  min-width: max-content;
+}
+
+.study-calendar-months {
+  margin-bottom: 6px;
+}
+
+.study-calendar-month-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--calendar-weeks), 17px);
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.study-calendar-month-grid span {
+  min-width: 42px;
+}
+
+.study-calendar-weekdays {
+  display: grid;
+  grid-template-rows: repeat(7, 17px);
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 17px;
+}
+
+.study-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--calendar-weeks), 17px);
+  gap: 5px;
+}
+
+.study-calendar-week {
+  display: grid;
+  grid-template-rows: repeat(7, 17px);
+  gap: 5px;
 }
 
 .heatmap-day {
   display: block;
-  aspect-ratio: 1;
-  min-width: 0;
+  width: 17px;
+  height: 17px;
   border: 1px solid rgba(15, 32, 51, 0.06);
   border-radius: 5px;
   background: #edf1f4;
+  padding: 0;
+}
+
+button.heatmap-day {
+  cursor: pointer;
+}
+
+.heatmap-day.is-active {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px rgba(15, 32, 51, 0.12);
+}
+
+.heatmap-day.is-future {
+  opacity: 0.35;
 }
 
 .heatmap-level-1 {
@@ -1097,6 +1157,61 @@ textarea:focus-visible {
 
 .heatmap-level-4 {
   background: var(--teal);
+}
+
+.study-heatmap-detail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fbfb;
+}
+
+.study-heatmap-detail div {
+  display: grid;
+  gap: 4px;
+}
+
+.study-heatmap-detail span,
+.study-heatmap-detail p {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.study-heatmap-detail strong {
+  color: var(--ink);
+}
+
+.study-heatmap-detail p {
+  grid-column: 1 / -1;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.study-heatmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.legend-item {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.legend-item .heatmap-day {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
 }
 
 .study-log-form,
@@ -1469,7 +1584,8 @@ textarea:focus-visible {
   }
 
   .study-log-stats,
-  .study-log-form {
+  .study-log-form,
+  .study-heatmap-detail {
     grid-template-columns: 1fr;
   }
 

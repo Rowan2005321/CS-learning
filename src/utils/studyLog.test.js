@@ -152,20 +152,94 @@ describe("study review helpers", () => {
     expect(review.nextSteps).toEqual(["pset", "eval notes"]);
   });
 
-  it("builds heatmap days with intensity levels", () => {
+  it("builds calendar heatmap data by week", () => {
+    const heatmap = buildStudyLogHeatmap([], {
+      weeks: 2,
+      today: new Date(2026, 5, 27),
+      locale: "en-US"
+    });
+
+    expect(heatmap.weeks).toHaveLength(2);
+    expect(heatmap.weeks[0].weekStart).toBe("2026-06-15");
+    expect(heatmap.weeks[1].weekStart).toBe("2026-06-22");
+    expect(heatmap.weeks[1].days.map((day) => day.date)).toEqual([
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-24",
+      "2026-06-25",
+      "2026-06-26",
+      "2026-06-27",
+      "2026-06-28"
+    ]);
+  });
+
+  it("aggregates multiple entries on the same heatmap day", () => {
     const heatmap = buildStudyLogHeatmap(
       [
         { id: "1", date: "2026-06-26", hours: 0.5, topic: "Light" },
-        { id: "2", date: "2026-06-27", hours: 4, topic: "Deep" }
+        { id: "2", date: "2026-06-26", hours: 1.5, topic: "Deep" },
+        { id: "3", date: "2026-06-27", hours: 4, topic: "Project" }
       ],
-      3,
-      new Date(2026, 5, 27)
+      { weeks: 1, today: new Date(2026, 5, 27), locale: "en-US" }
     );
 
-    expect(heatmap).toEqual([
-      { date: "2026-06-25", hours: 0, hasLog: false, level: 0 },
-      { date: "2026-06-26", hours: 0.5, hasLog: true, level: 1 },
-      { date: "2026-06-27", hours: 4, hasLog: true, level: 4 }
+    const day = heatmap.weeks[0].days.find((item) => item.date === "2026-06-26");
+
+    expect(day).toMatchObject({
+      hours: 2,
+      entries: 2,
+      topics: ["Deep", "Light"],
+      hasLog: true,
+      level: 2
+    });
+  });
+
+  it("assigns heatmap intensity levels", () => {
+    const heatmap = buildStudyLogHeatmap(
+      [
+        { id: "low", date: "2026-06-23", hours: 1, topic: "Low" },
+        { id: "medium", date: "2026-06-24", hours: 2, topic: "Medium" },
+        { id: "high", date: "2026-06-25", hours: 3, topic: "High" },
+        { id: "deep", date: "2026-06-26", hours: 4, topic: "Deep" }
+      ],
+      { weeks: 1, today: new Date(2026, 5, 27), locale: "en-US" }
+    );
+
+    const levelsByDate = Object.fromEntries(
+      heatmap.weeks[0].days.map((day) => [day.date, day.level])
+    );
+
+    expect(levelsByDate).toMatchObject({
+      "2026-06-22": 0,
+      "2026-06-23": 1,
+      "2026-06-24": 2,
+      "2026-06-25": 3,
+      "2026-06-26": 4
+    });
+  });
+
+  it("generates month labels for the calendar heatmap", () => {
+    const heatmap = buildStudyLogHeatmap([], {
+      weeks: 3,
+      today: new Date(2026, 6, 10),
+      locale: "en-US"
+    });
+
+    expect(heatmap.monthLabels).toEqual([
+      { weekIndex: 0, label: "Jun", month: 6, year: 2026 },
+      { weekIndex: 2, label: "Jul", month: 7, year: 2026 }
     ]);
+  });
+
+  it("handles empty calendar heatmap data", () => {
+    const heatmap = buildStudyLogHeatmap([], {
+      weeks: 1,
+      today: new Date(2026, 5, 27),
+      locale: "en-US"
+    });
+
+    expect(heatmap.weeks).toHaveLength(1);
+    expect(heatmap.weeks[0].days.every((day) => day.hours === 0 && day.entries === 0)).toBe(true);
+    expect(heatmap.legend.map((item) => item.level)).toEqual([0, 1, 2, 3, 4]);
   });
 });

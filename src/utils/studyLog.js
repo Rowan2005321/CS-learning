@@ -1,5 +1,13 @@
 export const STUDY_LOG_STORAGE_VERSION = 1;
 
+export const STUDY_LOG_HEATMAP_LEGEND = [
+  { level: 0, key: "zero", label: "0h", minHours: 0, maxHours: 0 },
+  { level: 1, key: "low", label: "0-1h", minHours: 0, maxHours: 1 },
+  { level: 2, key: "medium", label: "1-2h", minHours: 1, maxHours: 2 },
+  { level: 3, key: "high", label: "2-4h", minHours: 2, maxHours: 4 },
+  { level: 4, key: "deep", label: "4h+", minHours: 4, maxHours: null }
+];
+
 function toLocalDateKey(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -86,6 +94,33 @@ function aggregateTopics(entries) {
   return [...topicHours.entries()]
     .map(([topic, hours]) => ({ topic, hours }))
     .sort((first, second) => second.hours - first.hours || first.topic.localeCompare(second.topic));
+}
+
+function startOfWeek(date) {
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const mondayOffset = start.getDay() === 0 ? 6 : start.getDay() - 1;
+  start.setDate(start.getDate() - mondayOffset);
+
+  return start;
+}
+
+function getHeatmapLevel(hours) {
+  if (hours <= 0) return 0;
+  if (hours <= 1) return 1;
+  if (hours <= 2) return 2;
+  if (hours < 4) return 3;
+  return 4;
+}
+
+function formatMonthLabel(date, locale) {
+  return new Intl.DateTimeFormat(locale, { month: "short" }).format(date);
+}
+
+function formatWeekdayLabel(dayIndex, locale) {
+  const monday = new Date(2026, 0, 5);
+  monday.setDate(monday.getDate() + dayIndex);
+
+  return new Intl.DateTimeFormat(locale, { weekday: "short" }).format(monday);
 }
 
 export function todayKey(date = new Date()) {
@@ -240,29 +275,86 @@ export function buildWeeklyReview(entries, today = new Date()) {
   };
 }
 
-export function buildStudyLogHeatmap(entries, days = 35, today = new Date()) {
+export function buildStudyLogHeatmap(entries, options = {}) {
+  const {
+    weeks: weekCount = 12,
+    today = new Date(),
+    locale = "en-US"
+  } = typeof options === "number" ? { weeks: Math.ceil(options / 7) } : options;
   const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const startDate = new Date(todayDate);
-  startDate.setDate(todayDate.getDate() - days + 1);
+  const currentWeekStart = startOfWeek(todayDate);
+  const startDate = new Date(currentWeekStart);
+  startDate.setDate(currentWeekStart.getDate() - (weekCount - 1) * 7);
+  const endDate = new Date(currentWeekStart);
+  endDate.setDate(currentWeekStart.getDate() + 6);
 
-  const hoursByDate = new Map();
+  const entriesByDate = new Map();
   for (const entry of entriesBetween(entries, startDate, todayDate)) {
-    hoursByDate.set(entry.date, roundHours((hoursByDate.get(entry.date) ?? 0) + entry.hours));
+    const dayEntries = entriesByDate.get(entry.date) ?? [];
+    dayEntries.push(entry);
+    entriesByDate.set(entry.date, dayEntries);
   }
 
-  return Array.from({ length: days }, (_, index) => {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + index);
-    const dateKey = toLocalDateKey(date);
-    const hours = hoursByDate.get(dateKey) ?? 0;
+  const weeks = Array.from({ length: weekCount }, (_, weekIndex) => {
+    const weekStart = new Date(startDate);
+    weekStart.setDate(startDate.getDate() + weekIndex * 7);
 
     return {
-      date: dateKey,
-      hours,
-      hasLog: hours > 0,
-      level: hours === 0 ? 0 : hours < 1 ? 1 : hours < 2 ? 2 : hours < 4 ? 3 : 4
+      weekStart: toLocalDateKey(weekStart),
+      days: Array.from({ length: 7 }, (_, weekdayIndex) => {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + weekdayIndex);
+        const dateKey = toLocalDateKey(date);
+        const dayEntries = entriesByDate.get(dateKey) ?? [];
+        const hours = roundHours(dayEntries.reduce((sum, entry) => sum + entry.hours, 0));
+        const topics = aggregateTopics(dayEntries).map((topic) => topic.topic);
+        const isFuture = date > todayDate;
+
+        return {
+          date: dateKey,
+          weekday: weekdayIndex + 1,
+          hours,
+          entries: dayEntries.length,
+          topics,
+          hasLog: hours > 0,
+          isFuture,
+          level: isFuture ? 0 : getHeatmapLevel(hours)
+        };
+      })
     };
   });
+
+  const monthLabels = [];
+  let previousMonth = "";
+  for (const [weekIndex, week] of weeks.entries()) {
+    const firstVisibleDay = week.days.find((day) => !day.isFuture) ?? week.days[0];
+    const date = fromDateKey(firstVisibleDay.date);
+    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+
+    if (monthKey !== previousMonth) {
+      monthLabels.push({
+        weekIndex,
+        label: formatMonthLabel(date, locale),
+        month: date.getMonth() + 1,
+        year: date.getFullYear()
+      });
+      previousMonth = monthKey;
+    }
+  }
+
+  return {
+    startDate: toLocalDateKey(startDate),
+    endDate: toLocalDateKey(endDate),
+    today: toLocalDateKey(todayDate),
+    weeks,
+    monthLabels,
+    weekdayLabels: Array.from({ length: 7 }, (_, index) => ({
+      index,
+      label: formatWeekdayLabel(index, locale),
+      show: index === 0 || index === 2 || index === 4
+    })),
+    legend: STUDY_LOG_HEATMAP_LEGEND
+  };
 }
 
 export function calculateStudyLogStats(entries, today = new Date()) {

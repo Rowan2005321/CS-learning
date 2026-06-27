@@ -283,6 +283,7 @@ function App() {
 
         <StudyLogPanel
           logs={studyLogs}
+          lang={lang}
           t={t}
           onAddLog={addStudyLog}
           onDeleteLog={deleteStudyLog}

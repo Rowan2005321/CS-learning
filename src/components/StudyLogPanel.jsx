@@ -56,12 +56,24 @@ function formatRangeSummary(range, t) {
   });
 }
 
-export function StudyLogPanel({ logs, t, onAddLog, onDeleteLog, onImportLogs }) {
+export function StudyLogPanel({ logs, lang, t, onAddLog, onDeleteLog, onImportLogs }) {
   const [form, setForm] = useState(createInitialForm);
   const [importMessage, setImportMessage] = useState("");
+  const [activeHeatmapDate, setActiveHeatmapDate] = useState("");
   const importInputRef = useRef(null);
   const stats = useMemo(() => calculateStudyLogStats(logs), [logs]);
-  const heatmapDays = useMemo(() => buildStudyLogHeatmap(logs, 35), [logs]);
+  const heatmap = useMemo(
+    () => buildStudyLogHeatmap(logs, { weeks: 12, locale: lang === "zh" ? "zh-CN" : "en-US" }),
+    [lang, logs]
+  );
+  const heatmapDays = useMemo(
+    () => heatmap.weeks.flatMap((week) => week.days),
+    [heatmap.weeks]
+  );
+  const activeHeatmapDay =
+    heatmapDays.find((day) => day.date === activeHeatmapDate) ??
+    heatmapDays.find((day) => day.date === heatmap.today) ??
+    heatmapDays.at(-1);
   const weeklyTopics = stats.weeklyReview.topTopics
     .map((topic) => `${topic.topic} (${topic.hours}${t.hoursUnit})`)
     .join(", ");
@@ -245,15 +257,94 @@ export function StudyLogPanel({ logs, t, onAddLog, onDeleteLog, onImportLogs }) 
           <h3>{t.studyHeatmap}</h3>
           <span>{t.studyHeatmapHint}</span>
         </div>
-        <div className="study-heatmap-grid">
-          {heatmapDays.map((day) => (
-            <span
-              className={`heatmap-day heatmap-level-${day.level}`}
-              key={day.date}
-              title={`${day.date}: ${day.hours} ${t.hoursUnit}`}
-              aria-label={`${day.date}: ${day.hours} ${t.hoursUnit}`}
-            />
+
+        <div className="study-calendar-wrap">
+          <div className="study-calendar-months" aria-hidden="true">
+            <span />
+            <div
+              className="study-calendar-month-grid"
+              style={{ "--calendar-weeks": heatmap.weeks.length }}
+            >
+              {heatmap.monthLabels.map((month) => (
+                <span
+                  key={`${month.year}-${month.month}`}
+                  style={{ gridColumn: `${month.weekIndex + 1}` }}
+                >
+                  {month.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="study-calendar-body">
+            <div className="study-calendar-weekdays" aria-hidden="true">
+              {heatmap.weekdayLabels.map((day) => (
+                <span key={day.index}>{day.show ? day.label : ""}</span>
+              ))}
+            </div>
+            <div className="study-calendar-grid" style={{ "--calendar-weeks": heatmap.weeks.length }}>
+              {heatmap.weeks.map((week) => (
+                <div className="study-calendar-week" key={week.weekStart}>
+                  {week.days.map((day) => {
+                    const topics = day.topics.length ? day.topics.join(", ") : t.noHeatmapTopics;
+                    const ariaLabel = formatTemplate(t.heatmapDayAria, {
+                      date: day.date,
+                      hours: day.hours,
+                      entries: day.entries,
+                      topics
+                    });
+
+                    return (
+                      <button
+                        className={`heatmap-day heatmap-level-${day.level} ${
+                          activeHeatmapDay?.date === day.date ? "is-active" : ""
+                        } ${day.isFuture ? "is-future" : ""}`}
+                        key={day.date}
+                        type="button"
+                        aria-label={ariaLabel}
+                        title={ariaLabel}
+                        onClick={() => setActiveHeatmapDate(day.date)}
+                        onFocus={() => setActiveHeatmapDate(day.date)}
+                        onMouseEnter={() => setActiveHeatmapDate(day.date)}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="study-heatmap-detail" aria-live="polite">
+          <div>
+            <span>{t.heatmapSelectedDay}</span>
+            <strong>{activeHeatmapDay?.date}</strong>
+          </div>
+          <div>
+            <span>{t.logHours}</span>
+            <strong>
+              {activeHeatmapDay?.hours ?? 0} {t.hoursUnit}
+            </strong>
+          </div>
+          <div>
+            <span>{t.heatmapEntries}</span>
+            <strong>{activeHeatmapDay?.entries ?? 0}</strong>
+          </div>
+          <p>
+            <strong>{t.heatmapTopics}:</strong>{" "}
+            {activeHeatmapDay?.topics?.length ? activeHeatmapDay.topics.join(", ") : t.noHeatmapTopics}
+          </p>
+        </div>
+
+        <div className="study-heatmap-legend" aria-label={t.heatmapLegend}>
+          <span>{t.heatmapLess}</span>
+          {heatmap.legend.map((item) => (
+            <span className="legend-item" key={item.level}>
+              <span className={`heatmap-day heatmap-level-${item.level}`} aria-hidden="true" />
+              <span>{t.heatmapLegendLevels[item.key] ?? item.label}</span>
+            </span>
           ))}
+          <span>{t.heatmapMore}</span>
         </div>
       </div>
 
