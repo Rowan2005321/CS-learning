@@ -49,19 +49,30 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 
 ## Local Development
 
+Clone the repository and enter the project root first:
+
 ```powershell
-npm install
-npm run dev
+git clone https://github.com/Rowan2005321/CS-learning.git
+cd CS-learning
+```
+
+Install dependencies and start Vite:
+
+```powershell
+npm.cmd install
+npm.cmd run dev
 ```
 
 Then open the local URL printed by Vite.
 
+All npm commands must be run from the project root, the folder that contains `package.json`. If you run them from `C:\Users\pc` or another parent folder, npm will report `Could not read package.json`.
+
 ## Checks
 
 ```powershell
-npm run lint
-npm run test
-npm run build
+npm.cmd run lint
+npm.cmd run test
+npm.cmd run build
 ```
 
 The production site is generated in `dist/`.

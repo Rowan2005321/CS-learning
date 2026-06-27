@@ -49,19 +49,30 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 
 ## 本地开发
 
+请先克隆仓库，并进入项目根目录：
+
 ```powershell
-npm install
-npm run dev
+git clone https://github.com/Rowan2005321/CS-learning.git
+cd CS-learning
+```
+
+安装依赖并启动 Vite：
+
+```powershell
+npm.cmd install
+npm.cmd run dev
 ```
 
 然后打开 Vite 输出的本地地址。
 
+所有 npm 命令都必须在项目根目录执行，也就是包含 `package.json` 的目录。如果你在 `C:\Users\pc` 或其他父目录直接运行，npm 会报 `Could not read package.json`。
+
 ## 检查命令
 
 ```powershell
-npm run lint
-npm run test
-npm run build
+npm.cmd run lint
+npm.cmd run test
+npm.cmd run build
 ```
 
 生产构建产物会生成在 `dist/` 目录。
