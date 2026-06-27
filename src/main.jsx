@@ -1,371 +1,426 @@
 import React, { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
-  ArrowUpRight,
-  BookOpen,
-  Check,
+  ArrowRight,
+  Bookmark,
+  Brain,
+  CheckCircle2,
+  Code2,
   Compass,
-  Cpu,
   Database,
+  ExternalLink,
   Globe2,
-  Layers3,
-  Network,
+  Languages,
+  List,
+  Lock,
+  Map,
+  Play,
   Search,
   Shield,
-  Sparkles
+  Sigma,
+  TerminalSquare,
+  Wrench
 } from "lucide-react";
 import "./styles.css";
 
-const copy = {
-  zh: {
-    switchLabel: "EN",
-    eyebrow: "开源计算机科学学习地图",
-    title: "Open CS Atlas",
-    subtitle:
-      "仿照 OSSU 的思路，把公开课程、教材和项目练习整理成可执行的 CS 学习路线。",
-    search: "搜索课程、学校或主题",
-    all: "全部",
-    discipline: "学科",
-    level: "难度",
-    track: "路线",
-    open: "直达课程",
-    save: "收藏",
-    saved: "已收藏",
-    courses: "课程",
-    links: "直达链接",
-    projects: "项目关卡",
-    results: "门课程匹配",
-    roadmap: "学习路线",
-    catalog: "课程目录",
-    milestones: "项目里程碑",
-    source: "课程优先选择大学公开视频、开放教材和长期维护的课程页。",
-    noResults: "没有匹配课程，换一个关键词或筛选条件。",
-    progress: "本地收藏",
-    build: "验证命令：npm run build"
-  },
+const labels = {
   en: {
-    switchLabel: "中文",
-    eyebrow: "Open computer science learning map",
-    title: "Open CS Atlas",
-    subtitle:
-      "An OSSU-inspired roadmap that turns open courses, textbooks, and projects into an actionable CS curriculum.",
-    search: "Search courses, schools, or topics",
-    all: "All",
+    nav: ["Roadmap", "Courses", "Tracks", "Projects", "Sources"],
+    title: "Build a real computer science foundation from open courses",
+    subtitle: "A curated map across programming, math, systems, theory, AI, security, data, and software engineering.",
+    start: "Start the roadmap",
+    browse: "Browse courses",
+    pace: "Learn at your pace",
+    paceDesc: "Self-study with open courses from top universities.",
+    structured: "Structured roadmap",
+    structuredDesc: "A coherent path with prerequisites and milestones.",
+    links: "Course direct links",
+    linksDesc: "Every course opens the official source in one click.",
+    path: "Your learning path",
+    full: "View full roadmap",
+    progress: "Overall progress",
+    resume: "Resume where you left off",
+    courses: "Browse courses",
+    search: "Search courses...",
     discipline: "Discipline",
+    allDisciplines: "All disciplines",
     level: "Level",
+    allLevels: "All levels",
+    source: "Source",
+    time: "Est. time",
     track: "Track",
-    open: "Open course",
-    save: "Save",
-    saved: "Saved",
-    courses: "Courses",
-    links: "Direct links",
-    projects: "Project gates",
-    results: "matching courses",
-    roadmap: "Roadmap",
-    catalog: "Course Catalog",
-    milestones: "Project Milestones",
-    source: "Courses prioritize university videos, open textbooks, and maintained course pages.",
-    noResults: "No courses match. Try another keyword or filter.",
-    progress: "Local saves",
-    build: "Verified with: npm run build"
+    added: "Added",
+    action: "Action",
+    list: "List",
+    grid: "Grid",
+    map: "Discipline map",
+    projects: "Project milestones",
+    completed: "Completed",
+    active: "In progress",
+    locked: "Locked",
+    sources: "Our sources",
+    transparency: "Transparency",
+    openGithub: "Open View on GitHub",
+    footer: "Open CS Atlas is open source.",
+    noResults: "No courses match the current filters.",
+    lang: "English",
+    switchLang: "中文",
+    levels: { intro: "Intro", foundation: "Foundational", intermediate: "Intermediate", advanced: "Advanced" },
+    disciplines: {
+      programming: "Programming",
+      math: "Math",
+      systems: "Systems",
+      theory: "Theory",
+      ai: "AI",
+      data: "Data",
+      security: "Security",
+      engineering: "Software Engineering"
+    }
+  },
+  zh: {
+    nav: ["路线图", "课程", "方向", "项目", "来源"],
+    title: "用开源课程建立真正扎实的计算机科学基础",
+    subtitle: "覆盖编程、数学、系统、理论、人工智能、安全、数据与软件工程的自学地图。",
+    start: "开始路线图",
+    browse: "浏览课程",
+    pace: "按自己的节奏学习",
+    paceDesc: "用大学公开课和开放教材自学。",
+    structured: "结构化路线",
+    structuredDesc: "按前置知识、学科和里程碑组织。",
+    links: "课程直达链接",
+    linksDesc: "每门课都能一键打开官方来源。",
+    path: "你的学习路径",
+    full: "查看完整路线",
+    progress: "总体进度",
+    resume: "继续上次进度",
+    courses: "浏览课程",
+    search: "搜索课程...",
+    discipline: "学科",
+    allDisciplines: "全部学科",
+    level: "难度",
+    allLevels: "全部难度",
+    source: "来源",
+    time: "预计时长",
+    track: "路线",
+    added: "已加入",
+    action: "操作",
+    list: "列表",
+    grid: "网格",
+    map: "学科地图",
+    projects: "项目里程碑",
+    completed: "已完成",
+    active: "进行中",
+    locked: "待解锁",
+    sources: "课程来源",
+    transparency: "透明说明",
+    openGithub: "在 GitHub 查看",
+    footer: "Open CS Atlas 是开源学习地图。",
+    noResults: "当前筛选没有匹配课程。",
+    lang: "中文",
+    switchLang: "EN",
+    levels: { intro: "入门", foundation: "基础", intermediate: "进阶", advanced: "高级" },
+    disciplines: {
+      programming: "编程",
+      math: "数学",
+      systems: "系统",
+      theory: "理论",
+      ai: "人工智能",
+      data: "数据",
+      security: "安全",
+      engineering: "软件工程"
+    }
   }
 };
 
-const disciplines = [
-  { id: "foundation", icon: Compass, zh: "基础入门", en: "Foundations" },
-  { id: "math", icon: Layers3, zh: "数学基础", en: "Mathematics" },
-  { id: "programming", icon: BookOpen, zh: "编程与语言", en: "Programming" },
-  { id: "systems", icon: Cpu, zh: "系统", en: "Systems" },
-  { id: "algorithms", icon: Network, zh: "算法", en: "Algorithms" },
-  { id: "ai", icon: Sparkles, zh: "AI 与数据", en: "AI & Data" },
-  { id: "security", icon: Shield, zh: "安全与工程", en: "Security & Engineering" }
-];
+const icons = {
+  programming: Code2,
+  math: Sigma,
+  systems: TerminalSquare,
+  theory: Brain,
+  ai: Brain,
+  data: Database,
+  security: Shield,
+  engineering: Wrench
+};
 
-const levels = [
-  { id: "beginner", zh: "入门", en: "Beginner" },
-  { id: "intermediate", zh: "进阶", en: "Intermediate" },
-  { id: "advanced", zh: "高级", en: "Advanced" }
-];
-
-const tracks = [
-  {
-    id: "core",
-    zh: "CS 核心",
-    en: "CS Core",
-    descZh: "从编程、数学、算法到系统，适合完整打底。",
-    descEn: "Programming, math, algorithms, and systems for a complete base.",
-    color: "blue"
-  },
-  {
-    id: "systems",
-    zh: "系统方向",
-    en: "Systems",
-    descZh: "面向 OS、网络、数据库和计算机结构。",
-    descEn: "Operating systems, networks, databases, and architecture.",
-    color: "green"
-  },
-  {
-    id: "ai",
-    zh: "AI / 数据",
-    en: "AI / Data",
-    descZh: "机器学习、深度学习、统计与数据系统。",
-    descEn: "Machine learning, deep learning, statistics, and data systems.",
-    color: "violet"
-  },
-  {
-    id: "builder",
-    zh: "工程实践",
-    en: "Builder",
-    descZh: "把课程知识落到项目、工具链和安全实践。",
-    descEn: "Turn course knowledge into projects, tooling, and secure practice.",
-    color: "coral"
-  }
+const stages = [
+  ["programming", "Foundations", "0-4"],
+  ["programming", "Programming", "4-8"],
+  ["math", "Math", "8-16"],
+  ["systems", "Systems", "16-24"],
+  ["theory", "Theory", "24-32"],
+  ["data", "Data", "32-40"],
+  ["security", "Security", "40-48"],
+  ["engineering", "Engineering", "48+"]
 ];
 
 const courses = [
-  ["cs50", "foundation", "beginner", "core", "Harvard", "CS50x", "CS50x 计算机科学导论", "CS50x Introduction to Computer Science", "C, Python, Web", "C, Python, web", "https://cs50.harvard.edu/x/"],
-  ["mit60001", "foundation", "beginner", "core", "MIT", "6.0001", "Python 编程与计算思维", "Introduction to CS and Programming in Python", "Python, problem solving", "Python, problem solving", "https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/"],
-  ["cs61a", "programming", "intermediate", "core", "UC Berkeley", "CS 61A", "程序构造与抽象", "Structure and Interpretation of Computer Programs", "Scheme, Python, abstraction", "Scheme, Python, abstraction", "https://cs61a.org/"],
-  ["nand2tetris", "systems", "beginner", "systems", "Hebrew University", "Nand2Tetris", "从与门到俄罗斯方块", "From Nand to Tetris", "hardware, compiler, VM", "hardware, compiler, VM", "https://www.nand2tetris.org/"],
-  ["mit6042", "math", "intermediate", "core", "MIT", "6.042J", "计算机科学数学", "Mathematics for Computer Science", "proof, graph, probability", "proofs, graphs, probability", "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/"],
-  ["linear", "math", "beginner", "ai", "MIT", "18.06", "线性代数", "Linear Algebra", "matrix, vector space", "matrices, vector spaces", "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/"],
-  ["stat110", "math", "intermediate", "ai", "Harvard", "Stat 110", "概率论", "Probability", "random variables, inference", "random variables, inference", "https://projects.iq.harvard.edu/stat110/home"],
-  ["princeton-algs", "algorithms", "intermediate", "core", "Princeton", "Algorithms I/II", "算法 I/II", "Algorithms I/II", "sorting, graph, strings", "sorting, graphs, strings", "https://algs4.cs.princeton.edu/home/"],
-  ["mit6006", "algorithms", "intermediate", "core", "MIT", "6.006", "算法导论", "Introduction to Algorithms", "data structures, dynamic programming", "data structures, dynamic programming", "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/"],
-  ["cs61b", "programming", "intermediate", "core", "UC Berkeley", "CS 61B", "数据结构", "Data Structures", "Java, testing, data structures", "Java, testing, data structures", "https://sp24.datastructur.es/"],
-  ["ostep", "systems", "intermediate", "systems", "OSTEP", "OSTEP", "操作系统：三件简单的事", "Operating Systems: Three Easy Pieces", "process, memory, file system", "processes, memory, file systems", "https://pages.cs.wisc.edu/~remzi/OSTEP/"],
-  ["cs144", "systems", "advanced", "systems", "Stanford", "CS144", "计算机网络", "Computer Networking", "TCP/IP, routing, transport", "TCP/IP, routing, transport", "https://cs144.github.io/"],
-  ["cmu213", "systems", "advanced", "systems", "CMU", "15-213", "计算机系统导论", "Introduction to Computer Systems", "C, memory, linking", "C, memory, linking", "https://www.cs.cmu.edu/~213/"],
-  ["db15445", "systems", "advanced", "systems", "CMU", "15-445", "数据库系统", "Database Systems", "query, storage, transactions", "queries, storage, transactions", "https://15445.courses.cs.cmu.edu/"],
-  ["ml", "ai", "intermediate", "ai", "Stanford / DeepLearning.AI", "Machine Learning", "机器学习", "Machine Learning", "supervised, unsupervised, neural nets", "supervised, unsupervised, neural nets", "https://www.coursera.org/specializations/machine-learning-introduction"],
-  ["cs229", "ai", "advanced", "ai", "Stanford", "CS229", "机器学习", "Machine Learning", "optimization, generative models", "optimization, generative models", "https://cs229.stanford.edu/"],
-  ["cs231n", "ai", "advanced", "ai", "Stanford", "CS231n", "视觉识别深度学习", "Deep Learning for Computer Vision", "CNN, vision, representation", "CNNs, vision, representation", "https://cs231n.stanford.edu/"],
-  ["missing", "security", "beginner", "builder", "MIT", "Missing Semester", "计算机教育缺失的一课", "The Missing Semester", "shell, git, debugging", "shell, git, debugging", "https://missing.csail.mit.edu/"],
-  ["se", "security", "intermediate", "builder", "UC Berkeley", "CS169", "软件工程", "Software Engineering", "Rails, testing, SaaS", "Rails, testing, SaaS", "https://saasbook.info/"],
-  ["security", "security", "advanced", "builder", "Stanford", "CS155", "计算机与网络安全", "Computer and Network Security", "web, crypto, systems security", "web, crypto, systems security", "https://cs155.stanford.edu/"]
-].map(([id, discipline, level, track, school, code, zh, en, tagsZh, tagsEn, url]) => ({
-  id,
-  discipline,
-  level,
-  track,
-  school,
-  code,
-  title: { zh, en },
-  tags: { zh: tagsZh, en: tagsEn },
-  url
-}));
-
-const projects = [
-  {
-    zh: "写一个命令行工具，覆盖参数解析、文件 IO、测试和 README。",
-    en: "Build a CLI with argument parsing, file IO, tests, and a README."
-  },
-  {
-    zh: "实现一个小型解释器或虚拟机，连接编程语言与系统知识。",
-    en: "Implement a small interpreter or VM to connect PL and systems ideas."
-  },
-  {
-    zh: "完成一个网络服务：数据库、认证、缓存、日志和部署。",
-    en: "Ship a network service with database, auth, caching, logging, and deploy."
-  },
-  {
-    zh: "复现一篇 ML 课程作业或论文实验，写清数据、指标和误差分析。",
-    en: "Reproduce an ML assignment or paper experiment with metrics and error analysis."
-  }
+  ["cs50", "programming", "intro", "MIT OpenCourseWare", "CS50x: Introduction to Computer Science", "CS50x：计算机科学导论", "Programming basics with C, Python, SQL, and web.", "C、Python、SQL 和 Web 基础。", "8 weeks", "core", "https://cs50.harvard.edu/x/", ["programming", "python"]],
+  ["ucsd-dsa", "programming", "foundation", "UC San Diego", "Data Structures and Algorithms", "数据结构与算法", "Core data structures and algorithm design.", "核心数据结构和算法设计。", "10 weeks", "core", "https://www.coursera.org/specializations/data-structures-algorithms", ["algorithms", "data-structures"]],
+  ["discrete", "math", "foundation", "MIT OpenCourseWare", "Mathematics for Computer Science", "计算机科学数学", "Logic, proofs, sets, relations, and combinatorics.", "逻辑、证明、集合、关系和组合数学。", "12 weeks", "core", "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/", ["math", "discrete"]],
+  ["systems", "systems", "intermediate", "CMU", "Computer Organization and Systems", "计算机系统导论", "From gates to CPU, memory, linking, and processes.", "从门电路到 CPU、内存、链接和进程。", "12 weeks", "systems", "https://www.cs.cmu.edu/~213/", ["systems", "architecture"]],
+  ["ostep", "systems", "intermediate", "OSTEP", "Operating Systems: Three Easy Pieces", "操作系统：三个简单部分", "Processes, memory, concurrency, and file systems.", "进程、内存、并发和文件系统。", "10 weeks", "systems", "https://pages.cs.wisc.edu/~remzi/OSTEP/", ["os", "concurrency"]],
+  ["ml", "ai", "intermediate", "Stanford", "Introduction to Machine Learning", "机器学习导论", "Supervised learning, models, and evaluation.", "监督学习、模型和评估。", "10 weeks", "ai", "https://cs229.stanford.edu/", ["ai", "machine-learning"]],
+  ["db", "data", "intermediate", "CMU", "Database Systems", "数据库系统", "Storage, indexing, query processing, and transactions.", "存储、索引、查询处理和事务。", "12 weeks", "data", "https://15445.courses.cs.cmu.edu/", ["database", "sql"]],
+  ["security", "security", "foundation", "PortSwigger", "Web Security Academy", "Web 安全学院", "Hands-on labs for modern web security.", "现代 Web 安全实战实验。", "8 weeks", "security", "https://portswigger.net/web-security", ["security", "web"]],
+  ["engineering", "engineering", "intermediate", "Full Stack Open", "Full Stack Open", "全栈开放课程", "React, Node.js, testing, GraphQL, and CI/CD.", "React、Node.js、测试、GraphQL 和 CI/CD。", "12 weeks", "software", "https://fullstackopen.com/en/", ["software", "web"]]
 ];
 
-function AtlasVisual() {
+const projects = [
+  ["Hello World", "Write your first program and use Git.", "写第一个程序并使用 Git。", "completed"],
+  ["Data Structures", "Implement core data structures.", "实现核心数据结构。", "completed"],
+  ["Web Application", "Build a full-stack web application.", "构建一个全栈 Web 应用。", "active"],
+  ["Systems Program", "Build a small shell or systems tool.", "构建小型 shell 或系统工具。", "locked"],
+  ["ML Pipeline", "Train and evaluate a model.", "训练并评估一个模型。", "locked"],
+  ["Capstone", "Solve a real-world problem end-to-end.", "端到端解决真实问题。", "locked"]
+];
+
+const sources = ["MIT", "Stanford", "UC San Diego", "Carnegie Mellon", "Harvard", "Saylor.org"];
+
+function getStored(key, fallback) {
+  try {
+    return window.localStorage.getItem(key) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function HeroMap() {
+  const pins = [
+    [150, 154, "DB", "teal"],
+    [285, 100, "</>", "dark"],
+    [324, 248, "SW", "teal"],
+    [494, 133, "M", "amber"],
+    [410, 218, "OS", "violet"],
+    [615, 263, "SEC", "blue"],
+    [735, 151, "AI", "green"]
+  ];
   return (
-    <svg className="atlas" viewBox="0 0 460 340" role="img" aria-label="Open CS Atlas map">
-      <defs>
-        <linearGradient id="line" x1="0" x2="1">
-          <stop offset="0" stopColor="#2b7fff" />
-          <stop offset="1" stopColor="#14b8a6" />
-        </linearGradient>
-      </defs>
-      <path d="M70 170 C130 52 250 58 318 132 S382 264 242 284 S32 252 70 170Z" fill="#f8fbff" stroke="#d8e4f0" />
-      <path d="M120 112 L224 78 L338 142 L288 244 L148 250 Z" fill="none" stroke="url(#line)" strokeWidth="5" strokeLinecap="round" />
-      {[
-        [120, 112, "CS"],
-        [224, 78, "MATH"],
-        [338, 142, "SYS"],
-        [288, 244, "AI"],
-        [148, 250, "ENG"]
-      ].map(([x, y, label]) => (
-        <g key={label}>
-          <circle cx={x} cy={y} r="32" fill="#fff" stroke="#b8c7d8" strokeWidth="2" />
-          <text x={x} y={y + 5} textAnchor="middle" fontSize="13" fontWeight="800" fill="#132033">{label}</text>
+    <div className="hero-visual" aria-hidden="true">
+      <svg viewBox="0 0 980 430" className="atlas-map" focusable="false">
+        <defs>
+          <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#e8f5f6" />
+            <stop offset="100%" stopColor="#bddfe4" />
+          </linearGradient>
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+            <feDropShadow dx="0" dy="18" stdDeviation="18" floodColor="#0f172a" floodOpacity=".18" />
+          </filter>
+        </defs>
+        <g transform="rotate(-2 500 214)" filter="url(#softShadow)">
+          <polygon className="paper" points="42,28 940,2 970,350 64,396" />
+          <polygon className="water" points="62,50 916,24 948,332 88,374" />
+          <path className="grid" d="M140 42 154 370M232 39 244 365M324 36 336 360M416 33 426 356M508 31 517 352M600 28 607 348M692 26 698 344M784 24 788 340M876 21 879 336M66 98 923 71M70 146 928 119M74 194 933 167M78 242 938 216M83 290 943 265M87 338 948 315" />
+          <path className="land" d="M116 132c34-44 86-52 132-30 30 14 49 7 85 3 49-6 72 20 92 52-30 17-72 12-105 5-45-10-80 2-116 24-48 29-99 11-88-54z" />
+          <path className="land" d="M254 232c58-23 122-12 159 28 28 30 69 40 104 26 27-11 47 4 61 26-40 31-117 34-174 8-41-19-71-48-121-37-34 7-60-16-29-51z" />
+          <path className="land" d="M474 88c72-37 160-36 228 1 57 31 111 21 166 7 44-11 66 15 54 45-62 20-145 10-205 23-87 18-161-6-243-76z" />
+          <path className="land" d="M628 186c32-25 91-22 124 3 31 24 71 28 112 23 33-4 55 15 43 44-55 19-127 8-175-16-32-16-71-12-100 9-30 21-56-26-4-63z" />
         </g>
-      ))}
-      <circle cx="78" cy="242" r="6" fill="#f97316" />
-      <circle cx="382" cy="88" r="7" fill="#7c3aed" />
-      <circle cx="392" cy="250" r="5" fill="#14b8a6" />
-    </svg>
+        <path className="route" d="M146 170 C210 105 292 118 354 166 S453 241 542 171 S693 95 748 162 S814 248 874 230" />
+        {[205, 348, 560, 674, 804].map((x, i) => <circle className="route-dot" cx={x} cy={[146, 166, 154, 208, 212][i]} r="9" key={x} />)}
+        {pins.map(([x, y, label, tone]) => (
+          <g className="pin" transform={`translate(${x} ${y})`} key={label}>
+            <circle className="pin-rim" r="37" />
+            <circle className={`pin-core ${tone}`} r="30" />
+            <text textAnchor="middle" dominantBaseline="central">{label}</text>
+          </g>
+        ))}
+        <g className="compass-rose" transform="translate(790 245)">
+          <circle cx="76" cy="76" r="70" />
+          <circle className="face" cx="76" cy="76" r="56" />
+          <path className="needle north" d="M76 18 95 77 76 66 57 77Z" />
+          <path className="needle south" d="M76 134 95 77 76 88 57 77Z" />
+          <circle className="pivot" cx="76" cy="76" r="10" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+function Header({ lang, setLang, t }) {
+  return (
+    <header className="site-header">
+      <a className="brand" href="#roadmap">
+        <Compass size={25} />
+        <span>Open CS Atlas</span>
+      </a>
+      <nav>
+        {t.nav.map((item, index) => (
+          <a key={item} href={["#roadmap", "#courses", "#tracks", "#projects", "#sources"][index]}>{item}</a>
+        ))}
+      </nav>
+      <button className="lang-switch" onClick={() => setLang(lang === "zh" ? "en" : "zh")}>
+        <Languages size={16} />
+        {t.lang} / {t.switchLang}
+      </button>
+    </header>
   );
 }
 
 function App() {
-  const [lang, setLang] = useState("zh");
+  const [lang, setLang] = useState(() => getStored("open-cs-atlas-lang", "zh"));
   const [query, setQuery] = useState("");
   const [discipline, setDiscipline] = useState("all");
   const [level, setLevel] = useState("all");
-  const [track, setTrack] = useState("all");
-  const [saved, setSaved] = useState(() => JSON.parse(localStorage.getItem("atlas-saved") || "[]"));
-  const t = copy[lang];
+  const [saved, setSaved] = useState(() => new Set((getStored("open-cs-atlas-saved", "") || "").split(",").filter(Boolean)));
+  const t = labels[lang];
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const needle = query.trim().toLowerCase();
     return courses.filter((course) => {
-      const haystack = [course.school, course.code, course.title.zh, course.title.en, course.tags.zh, course.tags.en]
-        .join(" ")
-        .toLowerCase();
-      return (
-        (!q || haystack.includes(q)) &&
-        (discipline === "all" || course.discipline === discipline) &&
-        (level === "all" || course.level === level) &&
-        (track === "all" || course.track === track)
-      );
+      const haystack = course.join(" ").toLowerCase();
+      return (!needle || haystack.includes(needle)) &&
+        (discipline === "all" || course[1] === discipline) &&
+        (level === "all" || course[2] === level);
     });
-  }, [query, discipline, level, track]);
+  }, [query, discipline, level]);
 
-  const toggleSave = (id) => {
-    const next = saved.includes(id) ? saved.filter((item) => item !== id) : [...saved, id];
+  function switchLang(next) {
+    setLang(next);
+    window.localStorage.setItem("open-cs-atlas-lang", next);
+  }
+
+  function toggleSaved(id) {
+    const next = new Set(saved);
+    next.has(id) ? next.delete(id) : next.add(id);
     setSaved(next);
-    localStorage.setItem("atlas-saved", JSON.stringify(next));
-  };
+    window.localStorage.setItem("open-cs-atlas-saved", Array.from(next).join(","));
+  }
 
-  const label = (list, id) => list.find((item) => item.id === id)?.[lang] || id;
+  const progress = Math.round((2 / projects.length) * 100);
 
   return (
-    <>
-      <header className="topbar">
-        <a className="brand" href="#top" aria-label="Open CS Atlas">
-          <Globe2 size={22} />
-          <span>Open CS Atlas</span>
-        </a>
-        <nav>
-          <a href="#roadmap">{t.roadmap}</a>
-          <a href="#catalog">{t.catalog}</a>
-          <a href="#milestones">{t.milestones}</a>
-        </nav>
-        <button className="iconText" onClick={() => setLang(lang === "zh" ? "en" : "zh")}>
-          <Globe2 size={17} />
-          {t.switchLabel}
-        </button>
-      </header>
-
-      <main id="top">
-        <section className="hero">
-          <div className="heroText">
-            <p className="eyebrow">{t.eyebrow}</p>
+    <div className="app-shell">
+      <Header lang={lang} setLang={switchLang} t={t} />
+      <main>
+        <section className="hero-section" id="roadmap">
+          <div className="hero-copy">
             <h1>{t.title}</h1>
-            <p className="lede">{t.subtitle}</p>
-            <div className="searchbar">
-              <Search size={18} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t.search} />
+            <p>{t.subtitle}</p>
+            <div className="hero-actions">
+              <a className="button primary" href="#path">{t.start}<ArrowRight size={16} /></a>
+              <a className="button secondary" href="#courses">{t.browse}</a>
             </div>
-            <div className="stats" aria-label="Site stats">
-              <span><strong>{courses.length}</strong>{t.courses}</span>
-              <span><strong>{courses.length}</strong>{t.links}</span>
-              <span><strong>{projects.length}</strong>{t.projects}</span>
-              <span><strong>{saved.length}</strong>{t.progress}</span>
+            <div className="proof-row">
+              <Feature icon={Compass} title={t.pace} desc={t.paceDesc} />
+              <Feature icon={Map} title={t.structured} desc={t.structuredDesc} />
+              <Feature icon={ExternalLink} title={t.links} desc={t.linksDesc} />
             </div>
           </div>
-          <AtlasVisual />
+          <HeroMap />
         </section>
 
-        <section id="roadmap" className="band">
-          <div className="sectionHead">
-            <p className="eyebrow">{t.roadmap}</p>
-            <h2>{lang === "zh" ? "按目标选择路线" : "Choose by learning goal"}</h2>
+        <section className="path-section" id="path">
+          <div className="section-heading compact">
+            <div>
+              <h2>{t.path}</h2>
+              <a href="#tracks">{t.full}<ArrowRight size={14} /></a>
+            </div>
+            <div className="progress-panel">
+              <span>{t.progress}</span>
+              <strong>{progress}%</strong>
+              <div className="progress-track"><div style={{ width: `${progress}%` }} /></div>
+              <a className="small-button" href="#projects"><Play size={14} />{t.resume}</a>
+            </div>
           </div>
-          <div className="trackGrid">
-            {tracks.map((item) => (
-              <button className={`trackCard ${item.color} ${track === item.id ? "active" : ""}`} key={item.id} onClick={() => setTrack(track === item.id ? "all" : item.id)}>
-                <span>{item[lang]}</span>
-                <small>{lang === "zh" ? item.descZh : item.descEn}</small>
+          <div className="roadmap-strip">
+            {stages.map(([id, title, weeks], index) => {
+              const Icon = icons[id] || Code2;
+              return (
+                <button className="roadmap-node" key={`${id}-${title}`} onClick={() => setDiscipline(id)}>
+                  <span>{index + 1}</span>
+                  <Icon size={23} />
+                  <strong>{lang === "zh" ? t.disciplines[id] : title}</strong>
+                  <small>{weeks} {lang === "zh" ? "周" : "weeks"}</small>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="courses-section" id="courses">
+          <aside className="filters-panel">
+            <div className="search-box"><Search size={16} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t.search} /></div>
+            <label>{t.discipline}<select value={discipline} onChange={(e) => setDiscipline(e.target.value)}>
+              <option value="all">{t.allDisciplines}</option>
+              {Object.keys(t.disciplines).map((id) => <option key={id} value={id}>{t.disciplines[id]}</option>)}
+            </select></label>
+            <label>{t.level}<select value={level} onChange={(e) => setLevel(e.target.value)}>
+              <option value="all">{t.allLevels}</option>
+              {Object.entries(t.levels).map(([id, text]) => <option key={id} value={id}>{text}</option>)}
+            </select></label>
+          </aside>
+          <div className="courses-main">
+            <div className="section-heading">
+              <div><h2>{t.courses}</h2><p>{filtered.length} {lang === "zh" ? "门课程" : "courses"}</p></div>
+              <div className="view-toggle"><button className="is-active"><List size={15} />{t.list}</button><button>{t.grid}</button></div>
+            </div>
+            {filtered.length ? <CourseTable rows={filtered} lang={lang} t={t} saved={saved} onSave={toggleSaved} /> : <p className="empty-state">{t.noResults}</p>}
+          </div>
+        </section>
+
+        <section className="discipline-section" id="tracks">
+          <div className="section-heading"><h2>{t.map}</h2></div>
+          <div className="discipline-grid">
+            {Object.entries(t.disciplines).map(([id, text]) => {
+              const Icon = icons[id] || Code2;
+              return <button className="discipline-tile" key={id} onClick={() => setDiscipline(id)}><Icon size={24} /><strong>{text}</strong></button>;
+            })}
+          </div>
+        </section>
+
+        <section className="projects-section" id="projects">
+          <div className="section-heading"><h2>{t.projects}</h2></div>
+          <div className="project-strip">
+            {projects.map(([title, en, zh, status], index) => (
+              <button className={`project-card ${status}`} key={title} disabled={status === "locked"}>
+                <span>{index + 1}</span><strong>{title}</strong><p>{lang === "zh" ? zh : en}</p>
+                {status === "locked" ? <Lock size={17} /> : <CheckCircle2 size={17} />}
               </button>
             ))}
           </div>
         </section>
 
-        <section id="catalog" className="catalog">
-          <div className="sectionHead">
-            <p className="eyebrow">{t.catalog}</p>
-            <h2>{filtered.length} {t.results}</h2>
-          </div>
-          <div className="filters">
-            <Select label={t.discipline} value={discipline} onChange={setDiscipline} options={disciplines} lang={lang} all={t.all} />
-            <Select label={t.level} value={level} onChange={setLevel} options={levels} lang={lang} all={t.all} />
-            <Select label={t.track} value={track} onChange={setTrack} options={tracks} lang={lang} all={t.all} />
-          </div>
-          <div className="courseGrid">
-            {filtered.map((course) => {
-              const Icon = disciplines.find((item) => item.id === course.discipline)?.icon || BookOpen;
-              const isSaved = saved.includes(course.id);
-              return (
-                <article className="courseCard" key={course.id}>
-                  <div className="courseTop">
-                    <span className="courseIcon"><Icon size={18} /></span>
-                    <span className="badge">{label(disciplines, course.discipline)}</span>
-                    <span className="badge muted">{label(levels, course.level)}</span>
-                  </div>
-                  <h3>{course.title[lang]}</h3>
-                  <p>{course.school} · {course.code}</p>
-                  <p className="tags">{course.tags[lang]}</p>
-                  <div className="actions">
-                    <button onClick={() => toggleSave(course.id)}>
-                      {isSaved ? <Check size={16} /> : <BookOpen size={16} />}
-                      {isSaved ? t.saved : t.save}
-                    </button>
-                    <a href={course.url} target="_blank" rel="noreferrer">
-                      {t.open}
-                      <ArrowUpRight size={16} />
-                    </a>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-          {filtered.length === 0 && <p className="empty">{t.noResults}</p>}
-        </section>
-
-        <section id="milestones" className="band milestones">
-          <div className="sectionHead">
-            <p className="eyebrow">{t.milestones}</p>
-            <h2>{lang === "zh" ? "用项目把知识串起来" : "Tie the knowledge together with projects"}</h2>
-          </div>
-          <ol>
-            {projects.map((project, index) => (
-              <li key={project.en}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <p>{project[lang]}</p>
-              </li>
-            ))}
-          </ol>
+        <section className="sources-section" id="sources">
+          <div><h2>{t.sources}</h2><p>{lang === "zh" ? "优先选择高质量、开放、可长期访问的课程来源。" : "High-quality, open, durable course sources are prioritized."}</p></div>
+          <div className="source-links">{sources.map((s) => <span key={s}>{s}</span>)}</div>
+          <div className="transparency-panel"><Globe2 size={24} /><div><h3>{t.transparency}</h3><p>{t.footer}</p></div></div>
         </section>
       </main>
-
-      <footer>
-        <Database size={18} />
-        <span>{t.source}</span>
-        <span>{t.build}</span>
-      </footer>
-    </>
+      <footer className="site-footer"><span>Open CS Atlas</span><a href="https://github.com/Rowan2005321/CS-learning" target="_blank" rel="noreferrer">{t.openGithub}<ExternalLink size={14} /></a></footer>
+    </div>
   );
 }
 
-function Select({ label: selectLabel, value, onChange, options, lang, all }) {
+function Feature({ icon: Icon, title, desc }) {
+  return <div className="feature"><Icon size={22} /><div><strong>{title}</strong><span>{desc}</span></div></div>;
+}
+
+function CourseTable({ rows, lang, t, saved, onSave }) {
   return (
-    <label>
-      <span>{selectLabel}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)}>
-        <option value="all">{all}</option>
-        {options.map((option) => (
-          <option value={option.id} key={option.id}>{option[lang]}</option>
-        ))}
-      </select>
-    </label>
+    <div className="course-table-wrap">
+      <table className="course-table">
+        <thead><tr><th>{lang === "zh" ? "课程" : "Course"}</th><th>{t.source}</th><th>{t.level}</th><th>{t.time}</th><th>{t.track}</th><th>{t.added}</th><th>{t.action}</th></tr></thead>
+        <tbody>
+          {rows.map((row) => {
+            const [id, disc, level, source, enTitle, zhTitle, enDesc, zhDesc, weeks, track, url, tags] = row;
+            const Icon = icons[disc] || Code2;
+            return (
+              <tr key={id}>
+                <td><div className="course-name"><span><Icon size={18} /></span><div><strong>{lang === "zh" ? zhTitle : enTitle}</strong><p>{lang === "zh" ? zhDesc : enDesc}</p></div></div></td>
+                <td><a href={url} target="_blank" rel="noreferrer">{source}<ExternalLink size={13} /></a></td>
+                <td>{t.levels[level]}</td>
+                <td>{weeks}</td>
+                <td>{track}</td>
+                <td>{saved.has(id) ? <CheckCircle2 size={17} /> : null}</td>
+                <td><button onClick={() => onSave(id)}><Bookmark size={16} /></button><a className="open-link" href={url} target="_blank" rel="noreferrer">{tags[0]}<ExternalLink size={13} /></a></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
