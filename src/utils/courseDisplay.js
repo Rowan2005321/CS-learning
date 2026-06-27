@@ -33,3 +33,12 @@ export function formatCourseDuration(course, lang) {
 
   return `${course.weeks} ${weekLabel} · ${course.hoursPerWeek}${weeklyLabel}${totalHours}`;
 }
+
+export function formatSearchMatch(searchMatch, t) {
+  if (!searchMatch) return "";
+
+  const type = t.searchHitTypes?.[searchMatch.field] ?? searchMatch.field;
+  const value = searchMatch.value ? ` ${searchMatch.value}` : "";
+
+  return `${t.searchHitPrefix}: ${type}${value}`;
+}

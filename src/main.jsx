@@ -27,6 +27,12 @@ function toggleId(list, id) {
 
 function scrollToCourses() {
   window.requestAnimationFrame(() => {
+    if (window.location.hash !== "#courses") {
+      const url = new URL(window.location.href);
+      url.hash = "courses";
+      window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    }
+
     document.querySelector("#courses")?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
@@ -140,6 +146,10 @@ function App() {
     scrollToCourses();
   }
 
+  function resumeCurrentRoute() {
+    scrollToCourses();
+  }
+
   function addStudyLog(entry) {
     setStudyLogs((current) => [entry, ...current].slice(0, 180));
   }
@@ -152,7 +162,7 @@ function App() {
     <div className="app-shell">
       <Header lang={lang} onLanguageChange={changeLanguage} t={t} />
       <main>
-        <Hero t={t} onSelectTrack={selectTrack} />
+        <Hero activeTrack={filters.track} t={t} onSelectTrack={selectTrack} />
         <Roadmap
           stages={stages}
           activeTrack={filters.track}
@@ -160,6 +170,7 @@ function App() {
           t={t}
           lang={lang}
           onSelectTrack={selectTrack}
+          onResumeRoute={resumeCurrentRoute}
         />
 
         <section className="courses-section" id="courses">

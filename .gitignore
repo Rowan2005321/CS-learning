@@ -2,5 +2,6 @@ node_modules/
 dist/
 .vite/
 server.*.log
+vite-dev*.log
 chrome-profile*/
 .DS_Store

@@ -86,7 +86,11 @@ function Feature({ icon: Icon, title, desc }) {
   );
 }
 
-export function Hero({ t, onSelectTrack }) {
+function routeButtonClass(activeTrack, track, variant) {
+  return `button ${variant} ${activeTrack === track ? "is-selected" : ""}`.trim();
+}
+
+export function Hero({ activeTrack, t, onSelectTrack }) {
   return (
     <section className="hero-section" id="roadmap">
       <div className="hero-copy">
@@ -96,24 +100,27 @@ export function Hero({ t, onSelectTrack }) {
 
         <div className="hero-actions" aria-label="Route starters">
           <button
-            className="button primary"
+            className={routeButtonClass(activeTrack, "foundations", "primary")}
             type="button"
+            aria-pressed={activeTrack === "foundations"}
             onClick={() => onSelectTrack("foundations")}
           >
             {t.startZero}
             <ArrowRight size={16} aria-hidden="true" />
           </button>
           <button
-            className="button secondary"
+            className={routeButtonClass(activeTrack, "ai-data", "secondary")}
             type="button"
+            aria-pressed={activeTrack === "ai-data"}
             onClick={() => onSelectTrack("ai-data")}
           >
             <Sparkles size={16} aria-hidden="true" />
             {t.aiRoute}
           </button>
           <button
-            className="button secondary"
+            className={routeButtonClass(activeTrack, "software-engineering", "secondary")}
             type="button"
+            aria-pressed={activeTrack === "software-engineering"}
             onClick={() => onSelectTrack("software-engineering")}
           >
             <BarChart3 size={16} aria-hidden="true" />

@@ -1,12 +1,18 @@
 import { ArrowRight, Play } from "lucide-react";
 import { stageIcons } from "./icons";
 
-export function Roadmap({ stages, activeTrack, progress, t, lang, onSelectTrack }) {
+export function Roadmap({ stages, activeTrack, progress, t, lang, onSelectTrack, onResumeRoute }) {
+  const activeRouteLabel = activeTrack === "all" ? t.allTracks : (t.tracks[activeTrack] ?? activeTrack);
+
   return (
     <section className="path-section" id="path">
       <div className="section-heading compact">
         <div>
           <h2>{t.path}</h2>
+          <p className="route-summary">
+            <strong>{t.currentRoute}:</strong> {activeRouteLabel}
+          </p>
+          <p className="route-summary muted">{t.routeFilterNote}</p>
           <a href="#tracks">
             {t.full}
             <ArrowRight size={14} aria-hidden="true" />
@@ -21,10 +27,10 @@ export function Roadmap({ stages, activeTrack, progress, t, lang, onSelectTrack 
           <p>
             {progress.completed}/{progress.total} {t.completedCourses}
           </p>
-          <a className="small-button" href="#courses">
+          <button className="small-button" type="button" onClick={onResumeRoute}>
             <Play size={14} aria-hidden="true" />
             {t.resume}
-          </a>
+          </button>
         </div>
       </div>
 

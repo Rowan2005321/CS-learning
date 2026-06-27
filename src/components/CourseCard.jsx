@@ -1,6 +1,7 @@
 import { Bookmark, BookmarkCheck, CheckCircle2, Circle, ExternalLink } from "lucide-react";
 import {
   formatCourseDuration,
+  formatSearchMatch,
   getAccessClass,
   getAccessLabel,
   getPriorityLabel,
@@ -26,6 +27,7 @@ export function CourseCard({
   const audience = localizeField(course.audience, lang);
   const outcomes = localizeField(course.outcomes, lang);
   const prerequisites = localizeField(course.prerequisites, lang);
+  const searchMatch = formatSearchMatch(course.searchMatch, t);
 
   return (
     <article className={`course-card ${isCompleted ? "is-completed" : ""}`}>
@@ -50,6 +52,7 @@ export function CourseCard({
             {course.provider}
             {course.university ? ` · ${course.university}` : ""} · {course.code}
           </p>
+          {searchMatch && <span className="search-hit">{searchMatch}</span>}
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import { Bookmark, BookmarkCheck, CheckCircle2, Circle, ExternalLink } from "lucide-react";
 import {
   formatCourseDuration,
+  formatSearchMatch,
   getAccessClass,
   getAccessLabel,
   getPriorityLabel,
@@ -46,6 +47,7 @@ export function CourseTable({
               const isCompleted = completedSet.has(course.id);
               const priorityLabel = getPriorityLabel(course, t);
               const sourceTypeLabel = getSourceTypeLabel(course, t);
+              const searchMatch = formatSearchMatch(course.searchMatch, t);
 
               return (
                 <tr key={course.id} className={isCompleted ? "is-completed" : ""}>
@@ -63,6 +65,7 @@ export function CourseTable({
                             {course.priority} · {priorityLabel}
                           </span>
                         )}
+                        {searchMatch && <span className="search-hit">{searchMatch}</span>}
                         <p>{localizeField(course.description, lang)}</p>
                       </div>
                     </div>

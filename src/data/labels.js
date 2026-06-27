@@ -46,6 +46,18 @@ export const labels = {
     routeEstimate:
       "If you study {hours} hours per week, this filtered route should take about {weeks} weeks.",
     emptyRouteEstimate: "Pick a route or search result to estimate study time.",
+    currentRoute: "Current route",
+    routeFilterNote: "The roadmap, route starter, and course filters now use this same route.",
+    searchHitPrefix: "Matched",
+    searchHitTypes: {
+      code: "course code",
+      title: "course title",
+      source: "source",
+      university: "university",
+      description: "description",
+      tags: "tag",
+      metadata: "metadata"
+    },
     studyLog: "Study log",
     studyLogEyebrow: "Daily follow-up",
     studyLogSubtitle:
@@ -209,6 +221,18 @@ export const labels = {
     weeklyHours: "每周可学习小时数",
     routeEstimate: "如果每周学习 {hours} 小时，当前筛选路线预计约 {weeks} 周完成。",
     emptyRouteEstimate: "选择路线或筛选课程后即可估算学习时间。",
+    currentRoute: "当前路线",
+    routeFilterNote: "路线图、首屏入口和课程筛选现在使用同一个路线状态。",
+    searchHitPrefix: "命中",
+    searchHitTypes: {
+      code: "课程代码",
+      title: "课程标题",
+      source: "来源",
+      university: "学校 / 机构",
+      description: "课程描述",
+      tags: "标签",
+      metadata: "课程信息"
+    },
     studyLog: "学习记录",
     studyLogEyebrow: "每日跟进",
     studyLogSubtitle:

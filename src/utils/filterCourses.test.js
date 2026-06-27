@@ -16,6 +16,25 @@ describe("filterCourses", () => {
     expect(result.map((course) => course.id)).toEqual(["cs229"]);
   });
 
+  it("ranks exact course code matches first", () => {
+    const result = filterCourses(courses, { ...allFilters, query: "CS50x" });
+
+    expect(result[0].id).toBe("cs50x");
+    expect(result[0].searchMatch).toMatchObject({
+      field: "code",
+      value: "CS50x"
+    });
+  });
+
+  it("returns a readable source match reason", () => {
+    const result = filterCourses(courses, { ...allFilters, query: "Harvard CS50" });
+
+    expect(result[0].searchMatch).toMatchObject({
+      field: "source",
+      value: "Harvard / CS50"
+    });
+  });
+
   it("combines discipline, level, and track filters", () => {
     const result = filterCourses(courses, {
       ...allFilters,
