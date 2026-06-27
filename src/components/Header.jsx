@@ -4,10 +4,6 @@ import { useState } from "react";
 export function Header({ lang, onLanguageChange, t }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  function switchLanguage() {
-    onLanguageChange(lang === "zh" ? "en" : "zh");
-  }
-
   return (
     <header className="site-header">
       <a className="brand" href="#roadmap" onClick={() => setIsOpen(false)}>
@@ -37,10 +33,27 @@ export function Header({ lang, onLanguageChange, t }) {
         ))}
       </nav>
 
-      <button className="lang-switch" type="button" onClick={switchLanguage}>
+      <div className="lang-switch" role="group" aria-label={t.languageToggle}>
         <Languages size={16} aria-hidden="true" />
-        {t.lang} / {t.switchLang}
-      </button>
+        <button
+          className={lang === "zh" ? "lang-option is-active" : "lang-option"}
+          type="button"
+          aria-pressed={lang === "zh"}
+          aria-label={t.switchToChinese}
+          onClick={() => onLanguageChange("zh")}
+        >
+          中文
+        </button>
+        <button
+          className={lang === "en" ? "lang-option is-active" : "lang-option"}
+          type="button"
+          aria-pressed={lang === "en"}
+          aria-label={t.switchToEnglish}
+          onClick={() => onLanguageChange("en")}
+        >
+          EN
+        </button>
+      </div>
     </header>
   );
 }

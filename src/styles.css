@@ -147,7 +147,28 @@ select:focus-visible {
 }
 
 .lang-switch {
-  padding: 9px 12px;
+  padding: 4px;
+}
+
+.lang-switch svg {
+  margin: 0 4px;
+  color: var(--muted);
+}
+
+.lang-option {
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.lang-option.is-active {
+  background: var(--teal);
+  color: #ffffff;
 }
 
 .nav-toggle {
@@ -1070,7 +1091,15 @@ select:focus-visible {
   }
 
   .lang-switch {
-    padding: 8px;
+    gap: 3px;
+  }
+
+  .lang-switch svg {
+    display: none;
+  }
+
+  .lang-option {
+    padding: 5px 7px;
     font-size: 12px;
   }
 

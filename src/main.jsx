@@ -30,8 +30,23 @@ function scrollToCourses() {
   });
 }
 
+function readInitialLanguage() {
+  if (typeof window === "undefined") return "zh";
+
+  const queryLang = new URLSearchParams(window.location.search).get("lang");
+  return queryLang === "en" || queryLang === "zh" ? queryLang : "zh";
+}
+
+function writeLanguageToUrl(nextLang) {
+  if (typeof window === "undefined") return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("lang", nextLang);
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
 function App() {
-  const [lang, setLang] = useLocalStorage("open-cs-atlas-lang", "zh");
+  const [lang, setLang] = useLocalStorage("open-cs-atlas-lang", readInitialLanguage());
   const [savedIds, setSavedIds] = useLocalStorage("open-cs-atlas-saved", []);
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
   const [weeklyHours, setWeeklyHours] = useLocalStorage("open-cs-atlas-weekly-hours", 8);
@@ -46,8 +61,20 @@ function App() {
   const t = labels[lang] ?? labels.zh;
 
   useEffect(() => {
+    const queryLang = new URLSearchParams(window.location.search).get("lang");
+    if ((queryLang === "en" || queryLang === "zh") && queryLang !== lang) {
+      setLang(queryLang);
+    }
+  }, [lang, setLang]);
+
+  useEffect(() => {
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
   }, [lang]);
+
+  function changeLanguage(nextLang) {
+    setLang(nextLang);
+    writeLanguageToUrl(nextLang);
+  }
 
   const filteredCourses = useMemo(() => filterCourses(courses, filters), [filters]);
   const progress = useMemo(() => calculateProgress(courses, completedIds), [completedIds]);
@@ -80,7 +107,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Header lang={lang} onLanguageChange={setLang} t={t} />
+      <Header lang={lang} onLanguageChange={changeLanguage} t={t} />
       <main>
         <Hero t={t} onSelectTrack={selectTrack} />
         <Roadmap

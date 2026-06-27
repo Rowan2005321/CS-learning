@@ -1,6 +1,10 @@
 # Open CS Atlas
 
+[简体中文](README.zh-CN.md) | English
+
 Open CS Atlas is a bilingual computer science self-study planner for Chinese learners. It turns open courses, public course notes, and project milestones into a roadmap that can be searched, filtered, saved, and tracked locally.
+
+Live site: [Open CS Atlas](https://rowan2005321.github.io/CS-learning/?lang=en) | [中文模式](https://rowan2005321.github.io/CS-learning/?lang=zh)
 
 > Screenshot placeholder: add a desktop and mobile screenshot after each major UI release. Suggested path: `docs/assets/open-cs-atlas-desktop.png` and `docs/assets/open-cs-atlas-mobile.png`.
 
