@@ -1,4 +1,9 @@
 import { ArrowRight, BarChart3, Compass, ExternalLink, Map, Sparkles } from "lucide-react";
+import { lazy, Suspense } from "react";
+
+const ThreeAtlasScene = lazy(() =>
+  import("./ThreeAtlasScene").then((module) => ({ default: module.ThreeAtlasScene }))
+);
 
 function HeroMap() {
   const pins = [
@@ -90,7 +95,7 @@ function routeButtonClass(activeTrack, track, variant) {
   return `button ${variant} ${activeTrack === track ? "is-selected" : ""}`.trim();
 }
 
-export function Hero({ activeTrack, t, onSelectTrack }) {
+export function Hero({ activeTrack, lang, t, onSelectTrack }) {
   return (
     <section className="hero-section" id="roadmap">
       <div className="hero-copy">
@@ -134,7 +139,13 @@ export function Hero({ activeTrack, t, onSelectTrack }) {
           <Feature icon={ExternalLink} title={t.officialLink} desc={t.footer} />
         </div>
       </div>
-      <HeroMap />
+      <Suspense fallback={<HeroMap />}>
+        <ThreeAtlasScene
+          lang={lang}
+          activeTrack={activeTrack}
+          onSelectTrack={onSelectTrack}
+        />
+      </Suspense>
     </section>
   );
 }

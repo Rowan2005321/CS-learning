@@ -34,6 +34,8 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - Real progress calculation from completed courses.
 - Study planner that estimates route duration from weekly available hours.
 - Daily study log for recording study hours, notes, outputs, next steps, and streak progress locally.
+- Optional Supabase account login and cloud sync for saved courses, completed courses, and study logs.
+- Interactive Three.js route map driven by `public/three3.json`.
 - Official direct link for every course.
 - GitHub Pages-ready static deployment.
 
@@ -41,6 +43,8 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 
 - React 19
 - Vite 6
+- Three.js
+- Supabase JS
 - Lucide React
 - ESLint
 - Prettier
@@ -76,6 +80,21 @@ npm.cmd run build
 ```
 
 The production site is generated in `dist/`.
+
+## Supabase Cloud Sync
+
+Cloud sync is optional. The app still works locally without Supabase.
+
+1. Create a Supabase project.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor.
+3. Copy `.env.example` to `.env.local`.
+4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+
+See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the full setup guide.
+
+## Three.js Route Map
+
+The hero route map is driven by [`public/three3.json`](public/three3.json). Add or edit nodes, edges, colors, camera settings, and motion values there before changing rendering code.
 
 ## Course Data Format
 

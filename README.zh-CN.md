@@ -34,6 +34,8 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - 根据已完成课程真实计算总体进度。
 - 学习计划面板可根据每周可学习小时数估算完成时间。
 - 学习记录面板可记录每日学习小时数、笔记、产出、下一步计划和连续记录天数，并保存在本地。
+- 可选 Supabase 账号登录与云同步，支持同步收藏课程、已完成课程和学习记录。
+- 由 `public/three3.json` 驱动的 Three.js 交互路线地图。
 - 每门课程都有官方直达链接。
 - 支持 GitHub Pages 静态部署。
 
@@ -41,6 +43,8 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 
 - React 19
 - Vite 6
+- Three.js
+- Supabase JS
 - Lucide React
 - ESLint
 - Prettier
@@ -76,6 +80,21 @@ npm.cmd run build
 ```
 
 生产构建产物会生成在 `dist/` 目录。
+
+## Supabase 云同步
+
+云同步是可选能力。没有配置 Supabase 时，应用仍然可以完整使用本地功能。
+
+1. 创建 Supabase 项目。
+2. 在 Supabase SQL Editor 中运行 [`supabase/schema.sql`](supabase/schema.sql)。
+3. 复制 `.env.example` 为 `.env.local`。
+4. 设置 `VITE_SUPABASE_URL` 和 `VITE_SUPABASE_PUBLISHABLE_KEY`。
+
+完整步骤见 [`docs/supabase-setup.md`](docs/supabase-setup.md)。
+
+## Three.js 路线地图
+
+首页路线地图由 [`public/three3.json`](public/three3.json) 驱动。后续要新增节点、连线、颜色、相机或动画参数，优先修改这个 JSON，再调整渲染代码。
 
 ## 课程数据格式
 

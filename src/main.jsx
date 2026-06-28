@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Grid2X2, List } from "lucide-react";
+import { AuthPanel } from "./components/AuthPanel";
 import { CourseCard } from "./components/CourseCard";
 import { CourseFilters } from "./components/CourseFilters";
 import { CourseTable } from "./components/CourseTable";
@@ -16,7 +17,14 @@ import { courses, tracks } from "./data/courses";
 import { labels } from "./data/labels";
 import { projects } from "./data/projects";
 import { stages } from "./data/stages";
+import { useAuth } from "./hooks/useAuth";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import {
+  loadCourseStateFromCloud,
+  loadStudyLogsFromCloud,
+  saveCourseStateToCloud,
+  saveStudyLogsToCloud
+} from "./services/cloudDataService";
 import { filterCourses } from "./utils/filterCourses";
 import { calculateProgress, estimateWeeks } from "./utils/progress";
 import {
@@ -76,6 +84,7 @@ function writeLanguageToUrl(nextLang) {
 }
 
 function App() {
+  const auth = useAuth();
   const [lang, setLang] = useLocalStorage("open-cs-atlas-lang", readInitialLanguage());
   const [savedIds, setSavedIds] = useLocalStorage("open-cs-atlas-saved", []);
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
@@ -91,6 +100,8 @@ function App() {
     level: "all",
     track: "all"
   });
+  const [cloudStatus, setCloudStatus] = useState("");
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const t = labels[lang] ?? labels.zh;
 
@@ -190,11 +201,62 @@ function App() {
     });
   }
 
+  async function saveLocalDataToCloud() {
+    if (!auth.user) return;
+
+    setIsSyncing(true);
+    setCloudStatus("");
+
+    try {
+      await saveCourseStateToCloud(
+        auth.user.id,
+        savedIds,
+        completedIds,
+        courses.map((course) => course.id)
+      );
+      await saveStudyLogsToCloud(auth.user.id, studyLogs);
+      setCloudStatus(t.cloudSaved);
+    } catch (error) {
+      setCloudStatus(error.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
+  async function loadCloudData() {
+    if (!auth.user) return;
+
+    setIsSyncing(true);
+    setCloudStatus("");
+
+    try {
+      const courseState = await loadCourseStateFromCloud(auth.user.id);
+      const cloudLogs = await loadStudyLogsFromCloud(auth.user.id);
+
+      setSavedIds(courseState.savedIds);
+      setCompletedIds(courseState.completedIds);
+      importStudyLogs(cloudLogs);
+      setCloudStatus(t.cloudLoaded);
+    } catch (error) {
+      setCloudStatus(error.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   return (
     <div className="app-shell">
       <Header lang={lang} onLanguageChange={changeLanguage} t={t} />
       <main>
-        <Hero activeTrack={filters.track} t={t} onSelectTrack={selectTrack} />
+        <Hero activeTrack={filters.track} lang={lang} t={t} onSelectTrack={selectTrack} />
+        <AuthPanel
+          auth={auth}
+          cloudStatus={cloudStatus}
+          isSyncing={isSyncing}
+          t={t}
+          onLoadCloudData={loadCloudData}
+          onSaveLocalData={saveLocalDataToCloud}
+        />
         <Roadmap
           stages={stages}
           activeTrack={filters.track}

@@ -1,6 +1,6 @@
 export const labels = {
   en: {
-    nav: ["Roadmap", "Courses", "Study Log", "Tracks", "Projects", "Sources"],
+    nav: ["Roadmap", "Account", "Courses", "Study Log", "Tracks", "Projects", "Sources"],
     heroTitle: "Build a real computer science foundation from open courses",
     heroValue: "A computer science self-study map made for Chinese learners",
     heroSubtitle:
@@ -41,6 +41,27 @@ export const labels = {
     languageToggle: "Language switcher",
     switchToChinese: "Switch to Chinese",
     switchToEnglish: "Switch to English",
+    accountEyebrow: "Cloud account",
+    accountTitle: "Sign in to sync your CS learning plan",
+    accountSubtitle:
+      "Keep local-first planning, then sync saved courses, completed courses, and study logs when Supabase is configured.",
+    supabaseMissingTitle: "Supabase is not configured yet",
+    supabaseMissingText:
+      "Create a Supabase project, run the schema in docs/supabase-setup.md, then set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.",
+    authMode: "Authentication mode",
+    signIn: "Sign in",
+    signUp: "Create account",
+    signOut: "Sign out",
+    email: "Email",
+    password: "Password",
+    passwordHint: "Use at least 6 characters. Supabase handles password storage.",
+    signedInAs: "Signed in as",
+    saveLocalToCloud: "Save local data to cloud",
+    loadCloudData: "Load cloud data",
+    cloudSaved: "Saved local course states and study logs to Supabase.",
+    cloudLoaded: "Loaded cloud course states and merged study logs into this browser.",
+    authSignedIn: "Signed in.",
+    authCheckEmail: "Account created. Check email if confirmation is enabled.",
     planner: "Study plan",
     weeklyHours: "Hours per week",
     routeEstimate:
@@ -208,7 +229,7 @@ export const labels = {
     }
   },
   zh: {
-    nav: ["路线图", "课程", "学习记录", "方向", "项目", "来源"],
+    nav: ["路线图", "账号", "课程", "学习记录", "方向", "项目", "来源"],
     heroTitle: "为中文学习者整理的计算机科学自学地图",
     heroValue: "从零基础到能做项目、能面试、能继续深造的路线规划器",
     heroSubtitle: "把公开课程、开放教材和项目里程碑整理成可执行的 CS 学习计划。",
@@ -248,6 +269,27 @@ export const labels = {
     languageToggle: "语言切换",
     switchToChinese: "切换到中文",
     switchToEnglish: "切换到英文",
+    accountEyebrow: "云端账号",
+    accountTitle: "登录后同步你的 CS 学习计划",
+    accountSubtitle:
+      "继续保持本地优先；配置 Supabase 后，可同步收藏课程、已完成课程和学习记录。",
+    supabaseMissingTitle: "Supabase 尚未配置",
+    supabaseMissingText:
+      "先创建 Supabase 项目，运行 docs/supabase-setup.md 里的 schema，然后设置 VITE_SUPABASE_URL 和 VITE_SUPABASE_PUBLISHABLE_KEY。",
+    authMode: "认证模式",
+    signIn: "登录",
+    signUp: "注册",
+    signOut: "退出登录",
+    email: "邮箱",
+    password: "密码",
+    passwordHint: "至少 6 位字符。密码存储由 Supabase 处理。",
+    signedInAs: "当前登录",
+    saveLocalToCloud: "上传本地数据",
+    loadCloudData: "拉取云端数据",
+    cloudSaved: "已把本地课程状态和学习记录保存到 Supabase。",
+    cloudLoaded: "已拉取云端课程状态，并把学习记录合并到当前浏览器。",
+    authSignedIn: "已登录。",
+    authCheckEmail: "账号已创建。如果启用了邮箱确认，请检查邮件。",
     planner: "学习计划",
     weeklyHours: "每周可学习小时数",
     routeEstimate: "如果每周学习 {hours} 小时，当前筛选路线预计约 {weeks} 周完成。",

@@ -3,5 +3,18 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   base: "./",
-  plugins: [react()]
+  plugins: [react()],
+  build: {
+    chunkSizeWarningLimit: 650,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom"],
+          supabase: ["@supabase/supabase-js"],
+          three: ["three"],
+          ui: ["lucide-react"]
+        }
+      }
+    }
+  }
 });

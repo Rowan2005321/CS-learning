@@ -3,7 +3,15 @@ import { useState } from "react";
 
 export function Header({ lang, onLanguageChange, t }) {
   const [isOpen, setIsOpen] = useState(false);
-  const navTargets = ["#roadmap", "#courses", "#study-log", "#tracks", "#projects", "#sources"];
+  const navTargets = [
+    "#roadmap",
+    "#account",
+    "#courses",
+    "#study-log",
+    "#tracks",
+    "#projects",
+    "#sources"
+  ];
 
   return (
     <header className="site-header">
