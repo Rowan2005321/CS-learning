@@ -36,6 +36,8 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - 学习记录面板可记录每日学习小时数、笔记、产出、下一步计划和连续记录天数，并保存在本地。
 - 可选 Supabase 账号登录与云同步，支持同步收藏课程、已完成课程和学习记录。
 - 由 `public/three3.json` 驱动的 Three.js 交互路线地图。
+- 多页面静态架构，包含 `/courses/`、`/tracks/`、`/study-log/`、`/account/`、`/projects/` 和 `/sources/`。
+- 使用 Web Worker 承担课程搜索排序、路线时间估算和进度摘要等规划计算。
 - 每门课程都有官方直达链接。
 - 支持 GitHub Pages 静态部署。
 
@@ -45,6 +47,7 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - Vite 6
 - Three.js
 - Supabase JS
+- Web Workers
 - Lucide React
 - ESLint
 - Prettier
@@ -80,6 +83,23 @@ npm.cmd run build
 ```
 
 生产构建产物会生成在 `dist/` 目录。
+
+## 架构说明
+
+Open CS Atlas 现在是 Vite 多页面应用，不再只依赖单页 hash 导航。主要静态页面包括：
+
+- `/`：首页 Hero 和路线总览。
+- `/courses/`：课程搜索、筛选、路线计划、收藏和完成状态。
+- `/study-log/`：每日学习记录、统计和复盘图表。
+- `/tracks/`：路线图和学科地图。
+- `/account/`：可选 Supabase 登录和云同步。
+- `/projects/`、`/sources/`：项目里程碑和课程来源说明。
+
+旧链接如 `/#courses`、`/#study-log` 会自动跳转到对应页面，避免已有 GitHub Pages 链接失效。
+
+课程规划计算通过 `src/hooks/useCoursePlannerWorker.js` 接入 Web Worker。Worker 调用 `src/app/coursePlanner.js` 中的纯函数；如果浏览器不支持 Worker，应用会自动回退到同步计算。
+
+页面、Worker、Supabase 和未来 Agent 后端边界详见 [`docs/architecture.md`](docs/architecture.md)。
 
 ## Supabase 云同步
 

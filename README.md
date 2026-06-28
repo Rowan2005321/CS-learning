@@ -36,6 +36,8 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - Daily study log for recording study hours, notes, outputs, next steps, and streak progress locally.
 - Optional Supabase account login and cloud sync for saved courses, completed courses, and study logs.
 - Interactive Three.js route map driven by `public/three3.json`.
+- Multi-page static architecture for `/courses/`, `/tracks/`, `/study-log/`, `/account/`, `/projects/`, and `/sources/`.
+- Web Worker-backed course planning calculations for search ranking, route estimates, and progress summaries.
 - Official direct link for every course.
 - GitHub Pages-ready static deployment.
 
@@ -45,6 +47,7 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - Vite 6
 - Three.js
 - Supabase JS
+- Web Workers
 - Lucide React
 - ESLint
 - Prettier
@@ -80,6 +83,23 @@ npm.cmd run build
 ```
 
 The production site is generated in `dist/`.
+
+## Architecture
+
+Open CS Atlas is built as a Vite multi-page app instead of a hash-only SPA. The main static pages are:
+
+- `/` for the hero and roadmap overview.
+- `/courses/` for course search, filters, route planning, saved courses, and completion state.
+- `/study-log/` for daily study records and review charts.
+- `/tracks/` for roadmap and discipline exploration.
+- `/account/` for optional Supabase login and cloud sync.
+- `/projects/` and `/sources/` for project milestones and source transparency.
+
+Legacy hash links such as `/#courses` and `/#study-log` are redirected to the matching page so older GitHub Pages links keep working.
+
+Course planning uses a Web Worker through `src/hooks/useCoursePlannerWorker.js`. The worker calls the shared pure function in `src/app/coursePlanner.js`; if Worker support is unavailable, the app automatically falls back to the same synchronous calculation path.
+
+See [`docs/architecture.md`](docs/architecture.md) for the page, Worker, Supabase, and future agent-backend boundaries.
 
 ## Supabase Cloud Sync
 

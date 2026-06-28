@@ -133,7 +133,7 @@ textarea:focus-visible {
   font-weight: 700;
 }
 
-.site-header nav a:first-child {
+.site-header nav a.is-active {
   color: var(--teal);
   border-bottom: 3px solid var(--teal);
   padding-bottom: 20px;
@@ -1787,7 +1787,7 @@ button.heatmap-day {
     border-bottom: 1px solid var(--line);
   }
 
-  .site-header nav a:first-child {
+  .site-header nav a.is-active {
     padding-bottom: 12px;
     border-bottom: 1px solid var(--line);
   }

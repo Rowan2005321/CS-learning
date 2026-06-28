@@ -1,21 +1,12 @@
 import { Compass, Languages, Menu, X } from "lucide-react";
 import { useState } from "react";
 
-export function Header({ lang, onLanguageChange, t }) {
+export function Header({ activePage, brandHref, lang, navLinks, onLanguageChange, t }) {
   const [isOpen, setIsOpen] = useState(false);
-  const navTargets = [
-    "#roadmap",
-    "#account",
-    "#courses",
-    "#study-log",
-    "#tracks",
-    "#projects",
-    "#sources"
-  ];
 
   return (
     <header className="site-header">
-      <a className="brand" href="#roadmap" onClick={() => setIsOpen(false)}>
+      <a className="brand" href={brandHref} onClick={() => setIsOpen(false)}>
         <Compass size={25} aria-hidden="true" />
         <span>Open CS Atlas</span>
       </a>
@@ -34,7 +25,9 @@ export function Header({ lang, onLanguageChange, t }) {
         {t.nav.map((item, index) => (
           <a
             key={item}
-            href={navTargets[index]}
+            className={navLinks[index]?.pageId === activePage ? "is-active" : ""}
+            aria-current={navLinks[index]?.pageId === activePage ? "page" : undefined}
+            href={navLinks[index]?.href ?? "#"}
             onClick={() => setIsOpen(false)}
           >
             {item}
