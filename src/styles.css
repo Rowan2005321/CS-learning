@@ -573,7 +573,7 @@ textarea:focus-visible {
 
 .auth-mode {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -604,6 +604,29 @@ textarea:focus-visible {
 
 .oauth-button {
   justify-content: center;
+}
+
+.auth-form-heading {
+  display: grid;
+  gap: 5px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+}
+
+.auth-form-heading h3,
+.auth-form-heading p {
+  margin: 0;
+}
+
+.auth-form-heading h3 {
+  font-size: 17px;
+}
+
+.auth-form-heading p,
+.auth-inline-tip {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .auth-help {
@@ -650,6 +673,45 @@ textarea:focus-visible {
 
 .auth-code-step .button {
   justify-self: start;
+}
+
+.auth-diagnostics {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(15, 143, 131, 0.2);
+  border-radius: 8px;
+  background: #f7fbfb;
+  padding: 12px;
+  font-size: 12px;
+}
+
+.auth-diagnostics dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.auth-diagnostics dl > div {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.45fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.auth-diagnostics dt {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.auth-diagnostics dd {
+  min-width: 0;
+  margin: 0;
+  word-break: break-word;
+}
+
+.auth-diagnostics p,
+.auth-inline-tip {
+  margin: 0;
 }
 
 .auth-form small,
@@ -2365,6 +2427,10 @@ button.heatmap-day {
 
   .auth-actions {
     display: grid;
+  }
+
+  .auth-mode {
+    grid-template-columns: 1fr;
   }
 
   .button {

@@ -12,6 +12,7 @@ import {
   writeFiltersToUrl,
   writeLanguageToUrl
 } from "./app/navigation";
+import { buildAuthRedirectUrl } from "./auth/authRedirects";
 import { AuthPanel } from "./components/AuthPanel";
 import { CourseCard } from "./components/CourseCard";
 import { CourseFilters } from "./components/CourseFilters";
@@ -74,11 +75,6 @@ function scrollToHashTarget(behavior = "auto") {
   target.scrollIntoView({ behavior, block: "start" });
 }
 
-function toAbsoluteHref(href) {
-  if (typeof window === "undefined") return href;
-  return new URL(href, window.location.origin).toString();
-}
-
 function createClientId(prefix) {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
@@ -88,8 +84,8 @@ function createClientId(prefix) {
 }
 
 export function App({ pageId = PAGE_IDS.home }) {
-  const auth = useAuth();
   const [lang, setLang] = useLocalStorage("open-cs-atlas-lang", readInitialLanguage());
+  const auth = useAuth(lang);
   const [savedIds, setSavedIds] = useLocalStorage("open-cs-atlas-saved", []);
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
   const [weeklyHours, setWeeklyHours] = useLocalStorage("open-cs-atlas-weekly-hours", 8);
@@ -135,10 +131,10 @@ export function App({ pageId = PAGE_IDS.home }) {
   const showDisciplineMap = pageId === PAGE_IDS.tracks;
   const showProjects = pageId === PAGE_IDS.projects;
   const showSources = pageId === PAGE_IDS.sources;
-  const accountRedirectPage = showAccount ? readRedirectPage(null) : PAGE_IDS.studyLog;
+  const accountRedirectPage = showAccount ? readRedirectPage(PAGE_IDS.courses) : PAGE_IDS.studyLog;
   const authSuccessPage = accountRedirectPage ?? PAGE_IDS.studyLog;
   const authSuccessHref = buildPageHref(authSuccessPage, lang);
-  const authSuccessUrl = toAbsoluteHref(authSuccessHref);
+  const authSuccessUrl = buildAuthRedirectUrl(authSuccessPage, lang);
   const shouldBlockForMissingAuthConfig = isProtectedPage(pageId) && !auth.isConfigured;
   const shouldBlockForSignIn = isProtectedPage(pageId) && auth.isConfigured && !auth.user;
   const shouldBlockProtectedPage = shouldBlockForMissingAuthConfig || shouldBlockForSignIn;
@@ -267,7 +263,7 @@ export function App({ pageId = PAGE_IDS.home }) {
   }
 
   function handleAuthSuccess() {
-    window.location.assign(authSuccessHref);
+    window.location.replace(authSuccessHref);
   }
 
   function redirectToAccount(targetPageId = pageId) {
@@ -514,6 +510,7 @@ export function App({ pageId = PAGE_IDS.home }) {
             auth={auth}
             cloudStatus={cloudStatus}
             isSyncing={isSyncing}
+            lang={lang}
             oauthRedirectUrl={authSuccessUrl}
             redirectLabel={t.studyLog}
             successHref={authSuccessHref}

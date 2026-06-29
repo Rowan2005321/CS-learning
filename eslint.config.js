@@ -42,6 +42,14 @@ export default [
     }
   },
   {
+    files: ["scripts/**/*.mjs"],
+    languageOptions: {
+      globals: {
+        ...globals.node
+      }
+    }
+  },
+  {
     files: ["src/main.jsx"],
     rules: {
       "react-refresh/only-export-components": "off"

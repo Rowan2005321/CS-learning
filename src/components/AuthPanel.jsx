@@ -1,10 +1,32 @@
 import { BookOpen, Chrome, Cloud, LogOut, Mail, UploadCloud, UserRound } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
+import { getAuthReadinessReport } from "../auth/authDiagnostics";
+import { AUTH_EVENTS, AUTH_STATES, transitionAuthState } from "../auth/authStateMachine";
+import { getEmailProvider, maskEmail, normalizeEmail } from "../auth/emailUtils";
+
+const AUTH_TABS = {
+  otpLogin: "otp-login",
+  passwordLogin: "password-login",
+  signUp: "sign-up"
+};
+
+function formatStatus(template, values) {
+  return Object.entries(values).reduce(
+    (message, [key, value]) => message.replace(`{${key}}`, value),
+    template
+  );
+}
+
+function getQueryFlag(name) {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).has(name);
+}
 
 export function AuthPanel({
   auth,
   cloudStatus,
   isSyncing,
+  lang = "zh",
   oauthRedirectUrl,
   onAuthSuccess,
   onLoadCloudData,
@@ -13,98 +35,186 @@ export function AuthPanel({
   successHref,
   t
 }) {
+  const [activeTab, setActiveTab] = useState(AUTH_TABS.otpLogin);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailCode, setEmailCode] = useState("");
   const [isCodeStep, setIsCodeStep] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mode, setMode] = useState("sign-in");
   const [localStatus, setLocalStatus] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const [authState, dispatchAuthEvent] = useReducer(
+    transitionAuthState,
+    auth.isConfigured ? AUTH_STATES.ready : AUTH_STATES.misconfigured
+  );
+
+  const normalizedEmail = normalizeEmail(email);
+  const maskedEmail = maskEmail(normalizedEmail);
+  const isBusy = [
+    AUTH_STATES.sendingOtp,
+    AUTH_STATES.verifyingOtp,
+    AUTH_STATES.settingPassword,
+    AUTH_STATES.signingIn,
+    AUTH_STATES.oauthRedirecting
+  ].includes(authState);
+  const showDiagnostics = import.meta.env.DEV || getQueryFlag("debugAuth");
+  const diagnostics = useMemo(
+    () =>
+      getAuthReadinessReport({
+        currentUrl: typeof window === "undefined" ? undefined : window.location.href,
+        env: import.meta.env,
+        isSupabaseConfigured: auth.isConfigured,
+        lang,
+        redirectPage: oauthRedirectUrl
+      }),
+    [auth.isConfigured, lang, oauthRedirectUrl]
+  );
+  const provider = getEmailProvider(email);
+
+  useEffect(() => {
+    if (!auth.isConfigured) {
+      dispatchAuthEvent({ type: AUTH_EVENTS.error, errorCode: "SUPABASE_NOT_CONFIGURED" });
+    }
+  }, [auth.isConfigured]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+
+    const timer = window.setInterval(() => {
+      setCooldown((current) => Math.max(0, current - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [cooldown]);
+
+  function startCooldown() {
+    setCooldown(60);
+  }
+
+  function resetFormForTab(nextTab) {
+    setActiveTab(nextTab);
+    setEmailCode("");
+    setIsCodeStep(false);
+    setLocalStatus("");
+    dispatchAuthEvent(AUTH_EVENTS.reset);
+  }
+
+  function handleCodeChange(event) {
+    setEmailCode(event.target.value.replace(/\D/g, "").slice(0, 6));
+  }
+
+  function handleAuthError(error) {
+    dispatchAuthEvent({ type: AUTH_EVENTS.error, errorCode: error?.code });
+    setLocalStatus(error?.message ?? t.authUnknownError);
+  }
+
+  async function sendOtpForCurrentTab() {
+    setLocalStatus("");
+    dispatchAuthEvent(AUTH_EVENTS.sendOtp);
+
+    const result =
+      activeTab === AUTH_TABS.signUp
+        ? await auth.sendSignUpOtp(email, oauthRedirectUrl)
+        : await auth.sendSignInOtp(email, oauthRedirectUrl);
+
+    if (result.error) {
+      handleAuthError(result.error);
+      return;
+    }
+
+    dispatchAuthEvent(AUTH_EVENTS.otpSent);
+    setIsCodeStep(true);
+    startCooldown();
+    setLocalStatus(formatStatus(t.otpSentTo, { email: maskedEmail || normalizedEmail }));
+  }
+
+  async function verifyOtpForCurrentTab() {
+    setLocalStatus("");
+    dispatchAuthEvent(AUTH_EVENTS.verifyOtp);
+
+    const verifyResult = await auth.verifyEmailOtp(email, emailCode);
+    if (verifyResult.error) {
+      handleAuthError(verifyResult.error);
+      return;
+    }
+
+    if (activeTab === AUTH_TABS.signUp) {
+      dispatchAuthEvent(AUTH_EVENTS.setPassword);
+      const passwordResult = await auth.setPassword(password);
+      if (passwordResult.error) {
+        handleAuthError(passwordResult.error);
+        return;
+      }
+      dispatchAuthEvent(AUTH_EVENTS.passwordSet);
+      setLocalStatus(t.authCodeVerified);
+    } else {
+      dispatchAuthEvent(AUTH_EVENTS.otpVerified);
+      setLocalStatus(t.authSignedIn);
+    }
+
+    setEmailCode("");
+    setPassword("");
+    setIsCodeStep(false);
+    onAuthSuccess?.();
+  }
+
+  async function handlePasswordSignIn() {
+    setLocalStatus("");
+    dispatchAuthEvent(AUTH_EVENTS.signInPassword);
+
+    const result = await auth.signInWithPassword(email, password);
+    if (result.error) {
+      handleAuthError(result.error);
+      return;
+    }
+
+    dispatchAuthEvent(AUTH_EVENTS.otpVerified);
+    setPassword("");
+    setLocalStatus(t.authSignedIn);
+    onAuthSuccess?.();
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setLocalStatus("");
-    setIsSubmitting(true);
 
-    if (mode === "sign-up" && isCodeStep) {
-      const { error } = await auth.verifyEmailOtp(email, emailCode.trim(), password);
-      setIsSubmitting(false);
-
-      if (error) {
-        setLocalStatus(error.message);
-        return;
-      }
-
-      setEmailCode("");
-      setPassword("");
-      setIsCodeStep(false);
-      setLocalStatus(t.authCodeVerified);
-      onAuthSuccess?.();
+    if (activeTab === AUTH_TABS.passwordLogin) {
+      await handlePasswordSignIn();
       return;
     }
 
-    if (mode === "sign-up") {
-      const { error } = await auth.sendEmailOtp(email, oauthRedirectUrl);
-      setIsSubmitting(false);
-
-      if (error) {
-        setLocalStatus(error.message);
-        return;
-      }
-
-      setIsCodeStep(true);
-      setLocalStatus(t.authCodeSent.replace("{email}", email));
+    if (isCodeStep) {
+      await verifyOtpForCurrentTab();
       return;
     }
 
-    const result = await auth.signInWithEmail(email, password);
-    setIsSubmitting(false);
-    const { data, error } = result;
-
-    if (error) {
-      setLocalStatus(error.message);
-      return;
-    }
-
-    setPassword("");
-    if (data?.session) {
-      setLocalStatus(t.authSignedIn);
-      onAuthSuccess?.();
-      return;
-    }
-
-    setLocalStatus(t.authSignedIn);
+    await sendOtpForCurrentTab();
   }
 
   async function handleGoogleSignIn() {
     setLocalStatus("");
+    dispatchAuthEvent(AUTH_EVENTS.googleSignIn);
     const { error } = await auth.signInWithGoogle(oauthRedirectUrl);
 
     if (error) {
-      setLocalStatus(error.message);
+      handleAuthError(error);
     }
   }
 
-  async function handleResendCode() {
-    setLocalStatus("");
-    setIsSubmitting(true);
-    const { error } = await auth.sendEmailOtp(email, oauthRedirectUrl);
-    setIsSubmitting(false);
-
-    if (error) {
-      setLocalStatus(error.message);
-      return;
-    }
-
-    setLocalStatus(t.authCodeResent.replace("{email}", email));
-  }
-
-  function handleModeChange(nextMode) {
-    setMode(nextMode);
-    setEmailCode("");
-    setIsCodeStep(false);
-    setLocalStatus("");
-  }
+  const tabTitle =
+    activeTab === AUTH_TABS.otpLogin
+      ? t.otpLoginTitle
+      : activeTab === AUTH_TABS.passwordLogin
+        ? t.passwordLoginTitle
+        : t.signUpWithOtpTitle;
+  const primaryButtonLabel =
+    activeTab === AUTH_TABS.passwordLogin
+      ? t.signIn
+      : isCodeStep
+        ? t.verifyOtp
+        : t.sendOtp;
+  const resendLabel =
+    cooldown > 0 ? formatStatus(t.resendInSeconds, { seconds: cooldown }) : t.resendOtp;
+  const showPasswordFallbackTip =
+    activeTab === AUTH_TABS.passwordLogin && Boolean(auth.authError || localStatus);
 
   return (
     <section className="auth-section" id="account">
@@ -120,6 +230,9 @@ export function AuthPanel({
             <Cloud size={24} aria-hidden="true" />
             <strong>{t.supabaseMissingTitle}</strong>
             <p>{t.supabaseMissingText}</p>
+            {showDiagnostics ? (
+              <AuthDiagnostics diagnostics={diagnostics} t={t} />
+            ) : null}
           </div>
         ) : auth.user ? (
           <div className="auth-signed-in">
@@ -166,23 +279,22 @@ export function AuthPanel({
           </div>
         ) : (
           <form className="auth-form" onSubmit={handleSubmit}>
-            <div className="auth-mode" role="group" aria-label={t.authMode}>
-              <button
-                className={mode === "sign-in" ? "is-active" : ""}
-                type="button"
-                aria-pressed={mode === "sign-in"}
-                onClick={() => handleModeChange("sign-in")}
-              >
-                {t.signIn}
-              </button>
-              <button
-                className={mode === "sign-up" ? "is-active" : ""}
-                type="button"
-                aria-pressed={mode === "sign-up"}
-                onClick={() => handleModeChange("sign-up")}
-              >
-                {t.signUp}
-              </button>
+            <div className="auth-mode" role="tablist" aria-label={t.authMode}>
+              <AuthTabButton
+                isActive={activeTab === AUTH_TABS.otpLogin}
+                label={t.authTabOtpLogin}
+                onClick={() => resetFormForTab(AUTH_TABS.otpLogin)}
+              />
+              <AuthTabButton
+                isActive={activeTab === AUTH_TABS.passwordLogin}
+                label={t.authTabPasswordLogin}
+                onClick={() => resetFormForTab(AUTH_TABS.passwordLogin)}
+              />
+              <AuthTabButton
+                isActive={activeTab === AUTH_TABS.signUp}
+                label={t.authTabSignUp}
+                onClick={() => resetFormForTab(AUTH_TABS.signUp)}
+              />
             </div>
 
             {redirectLabel ? (
@@ -194,12 +306,17 @@ export function AuthPanel({
             <button
               className="button ghost oauth-button"
               type="button"
-              disabled={auth.isLoading}
+              disabled={auth.isLoading || isBusy}
               onClick={handleGoogleSignIn}
             >
               <Chrome size={16} aria-hidden="true" />
               {t.signInWithGoogle}
             </button>
+
+            <div className="auth-form-heading">
+              <h3>{tabTitle}</h3>
+              <p>{t.emailProviderHint.replace("{provider}", provider)}</p>
+            </div>
 
             <label htmlFor="auth-email">{t.email}</label>
             <input
@@ -214,21 +331,27 @@ export function AuthPanel({
             />
             <small className="auth-help">
               <Mail size={14} aria-hidden="true" />
-              {t.qqEmailHint}
+              {t.authCheckSpamFolder} {t.authAdminSmtpRequired}
             </small>
 
-            <label htmlFor="auth-password">{t.password}</label>
-            <input
-              id="auth-password"
-              type="password"
-              autoComplete={mode === "sign-up" ? "new-password" : "current-password"}
-              minLength={6}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              disabled={isCodeStep}
-              required
-            />
-            <small>{t.passwordHint}</small>
+            {activeTab !== AUTH_TABS.otpLogin ? (
+              <>
+                <label htmlFor="auth-password">{t.password}</label>
+                <input
+                  id="auth-password"
+                  type="password"
+                  autoComplete={
+                    activeTab === AUTH_TABS.signUp ? "new-password" : "current-password"
+                  }
+                  minLength={6}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  disabled={isCodeStep}
+                  required
+                />
+                <small>{t.passwordHint}</small>
+              </>
+            ) : null}
 
             {isCodeStep ? (
               <div className="auth-code-step">
@@ -238,41 +361,86 @@ export function AuthPanel({
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"
-                  placeholder="123456"
+                  placeholder={t.otpCodePlaceholder}
+                  maxLength={6}
                   value={emailCode}
-                  onChange={(event) => setEmailCode(event.target.value)}
+                  onChange={handleCodeChange}
                   required
                 />
-                <small>{t.emailCodeHint}</small>
+                <small>{t.otpCodeHint}</small>
                 <button
                   className="button ghost"
                   type="button"
-                  disabled={auth.isLoading || isSubmitting}
-                  onClick={handleResendCode}
+                  disabled={auth.isLoading || isBusy || cooldown > 0}
+                  onClick={sendOtpForCurrentTab}
                 >
-                  {t.resendEmailCode}
+                  {resendLabel}
                 </button>
               </div>
             ) : null}
 
-            <button
-              className="button primary"
-              type="submit"
-              disabled={auth.isLoading || isSubmitting}
-            >
-              {isCodeStep
-                ? t.verifyEmailCode
-                : mode === "sign-up"
-                  ? t.sendEmailCode
-                  : t.signIn}
+            <button className="button primary" type="submit" disabled={auth.isLoading || isBusy}>
+              {primaryButtonLabel}
             </button>
 
-            {auth.authError || localStatus ? (
-              <p className="auth-status">{auth.authError || localStatus}</p>
+            {showPasswordFallbackTip ? (
+              <p className="auth-inline-tip">{t.authTryOtpLogin}</p>
             ) : null}
+
+            {auth.authError || localStatus ? (
+              <p className="auth-status" role="status">
+                {auth.authError || localStatus}
+              </p>
+            ) : null}
+
+            {showDiagnostics ? <AuthDiagnostics diagnostics={diagnostics} t={t} /> : null}
           </form>
         )}
       </div>
     </section>
+  );
+}
+
+function AuthTabButton({ isActive, label, onClick }) {
+  return (
+    <button
+      className={isActive ? "is-active" : ""}
+      type="button"
+      role="tab"
+      aria-selected={isActive}
+      aria-pressed={isActive}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+function AuthDiagnostics({ diagnostics, t }) {
+  return (
+    <div className="auth-diagnostics">
+      <strong>{t.authDiagnosticsTitle}</strong>
+      <dl>
+        <div>
+          <dt>Supabase configured</dt>
+          <dd>{diagnostics.isConfigured ? "yes" : "no"}</dd>
+        </div>
+        <div>
+          <dt>{t.authCurrentOrigin}</dt>
+          <dd>{diagnostics.currentOrigin}</dd>
+        </div>
+        <div>
+          <dt>{t.authCurrentRedirectUrl}</dt>
+          <dd>{diagnostics.redirectUrl}</dd>
+        </div>
+        <div>
+          <dt>App base path</dt>
+          <dd>{diagnostics.appBasePath}</dd>
+        </div>
+      </dl>
+      {diagnostics.problems.length ? (
+        <p>{diagnostics.problems.join(", ")}</p>
+      ) : null}
+    </div>
   );
 }

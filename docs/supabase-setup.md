@@ -1,135 +1,189 @@
-# Supabase Setup
+# Supabase Production Login Checklist
 
-Open CS Atlas can run fully locally without Supabase. Supabase is only needed for account login and cloud sync.
+Open CS Atlas works local-first without Supabase. Supabase is required only for account login and optional cloud sync.
 
-## 1. Create a project
+## 1. Create a Supabase project
 
 Suggested settings:
 
 - Project name: `open-cs-atlas`
-- Organization plan: Free
-- Region: choose the closest available region for your main users
-- Database password: store it in a password manager; do not commit it to GitHub
+- Region: choose the nearest region for your main users
+- Database password: store it in a password manager
+- Never commit the database password or service role key
 
 ## 2. Run the schema
 
-Open the Supabase project, go to SQL Editor, and run:
+Open Supabase Dashboard -> SQL Editor and run the contents of:
 
-```sql
--- Paste the contents of supabase/schema.sql here.
+```text
+supabase/schema.sql
 ```
 
-The schema creates:
+The schema creates user-owned tables such as `profiles`, `user_course_states`, `study_logs`, `study_plans`, `user_project_progress`, `project_submissions`, and milestone logs. All user tables enable RLS and use `(select auth.uid())` policies so users can only read and write their own data.
 
-- `profiles`
-- `user_course_states`: saved/completed state, status, rating, and private notes per course
-- `study_logs`: daily study records with optional `course_id` and tags
-- `study_plans`: active plan settings such as weekly hours, target track, and target date
-- `study_plan_items`: ordered courses inside a plan
-- `user_project_progress`: per-user project milestone progress
-- `project_submissions`: per-user project GitHub/demo submissions, reflections, review requests, visibility, status, and reviewer feedback
-- `user_milestone_logs`: reflections and next steps for project milestones
-- `user_track_states`: per-user track status and goals
-- `project_templates`, `project_milestones`, `learning_tracks`: optional public catalog tables
+## 3. Configure frontend environment variables
 
-All user tables have Row Level Security enabled. Policies use `(select auth.uid())` and indexed `user_id` columns so each user can read and write only their own data.
-
-Catalog tables are RLS-enabled and expose read-only `select` policies to `anon` and `authenticated`. The frontend does not get insert, update, or delete policies for catalog data.
-
-The schema is intentionally non-destructive:
-
-- It uses `create table if not exists`.
-- It uses `alter table ... add column if not exists` for new fields.
-- It creates policies, constraints, indexes, and triggers only when missing.
-- It does not use `drop table`, `drop policy`, or destructive resets.
-
-## 3. Configure local environment
-
-Copy `.env.example` to `.env.local`:
+Local development:
 
 ```powershell
 copy .env.example .env.local
 ```
 
-Then fill in:
+Required values:
 
 ```text
 VITE_SUPABASE_URL=https://your-project-ref.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
 ```
 
-Use the publishable key in the frontend. Older Supabase projects may call this the anon public key; `VITE_SUPABASE_ANON_KEY` is still supported as a fallback. Never commit secret or service role keys.
+Older Supabase projects may call the publishable key the anon public key. `VITE_SUPABASE_ANON_KEY` is still supported as a fallback.
 
-## 4. Configure Auth
+Do not put `service_role` in any Vite variable. Browser builds must only receive a publishable or anon public key.
 
-Open Supabase Dashboard -> Authentication -> Providers.
+## 4. Configure Auth redirect URLs
 
-Enable Email so Gmail, QQ email, and other valid email addresses can sign up with email/password. QQ email does not need a separate OAuth provider; users can register with an address such as `name@qq.com`.
+Supabase Dashboard -> Authentication -> URL Configuration:
 
-Open CS Atlas uses a verification-code registration flow instead of relying on confirmation links. This avoids broken GitHub Pages callback links such as `404` pages after a user clicks an email confirmation URL.
+Site URL:
 
-Configure Supabase email templates:
+```text
+https://rowan2005321.github.io/CS-learning/
+```
 
-1. Open Supabase Dashboard -> Authentication -> Email Templates.
-2. Open the Magic Link template.
-3. Make sure the email body includes `{{ .Token }}`.
-4. Do not make the user-facing registration flow depend on `{{ .ConfirmationURL }}`.
+Redirect URLs:
 
-Suggested minimal Magic Link email body:
+```text
+https://rowan2005321.github.io/CS-learning/**
+http://localhost:5173/**
+http://127.0.0.1:5173/**
+```
+
+The app constructs all login redirects through `src/auth/authRedirects.js`. GitHub Pages uses the `/CS-learning/` base path; local dev uses `/`.
+
+## 5. Configure Custom SMTP
+
+Custom SMTP is required for production-quality login.
+
+Supabase's default email service is not suitable for production because:
+
+- It may only send to team members in some project states.
+- It may have very low rate limits.
+- Deliverability for QQ Mail, Gmail, Outlook, and school mailboxes can be unstable.
+- You cannot fully control SPF, DKIM, DMARC, sender identity, or bounce handling.
+
+Recommended SMTP setup:
+
+- Use a verified sender domain.
+- Configure SPF, DKIM, and DMARC.
+- Keep Auth Logs open while testing delivery.
+- Test QQ Mail, Gmail, Outlook, and at least one school mailbox.
+
+Frontend code cannot detect whether SMTP is correctly configured. If QQ/Gmail does not receive codes, check Supabase Auth Logs and SMTP provider logs.
+
+## 6. Configure email templates
+
+Open Supabase Dashboard -> Authentication -> Email Templates.
+
+The Open CS Atlas web flow verifies the 6-digit code inside the app. Do not depend on confirmation links for the primary flow.
+
+Magic Link / OTP template must include:
+
+```text
+{{ .Token }}
+```
+
+Confirm Signup template should also include:
+
+```text
+{{ .Token }}
+```
+
+Avoid making the user flow depend on:
+
+```text
+{{ .ConfirmationURL }}
+```
+
+Suggested OTP email body:
 
 ```html
 <h2>Open CS Atlas verification code</h2>
 <p>Your verification code is:</p>
 <p style="font-size: 28px; font-weight: 700; letter-spacing: 6px;">{{ .Token }}</p>
-<p>This code is used to create or sign in to your Open CS Atlas account.</p>
+<p>Enter this code in the Open CS Atlas page. You do not need to click a link.</p>
 <p>If you did not request this email, you can ignore it.</p>
 ```
 
-The frontend calls Supabase OTP APIs to send the code, verifies the code in the app, and then stores the user's password so future email/password sign-in still works.
+## 7. Configure Google OAuth
 
-To enable Google login:
+Google Cloud Console:
 
-1. Enable the Google provider in Supabase.
-2. Create Google OAuth credentials in Google Cloud Console.
-3. Add the Supabase callback URL shown in the Google provider panel, usually:
+- OAuth Client type: `Web application`
+
+Authorized JavaScript origins:
+
+```text
+https://rowan2005321.github.io
+http://localhost:5173
+http://127.0.0.1:5173
+```
+
+Authorized redirect URIs:
 
 ```text
 https://your-project-ref.supabase.co/auth/v1/callback
 ```
 
-4. Add local and hosted redirect URLs in Supabase Authentication -> URL Configuration:
+Then enable the Google provider in Supabase Dashboard -> Authentication -> Providers and paste the Google Client ID and Client Secret there.
 
-```text
-http://127.0.0.1:5173/**
-http://localhost:5173/**
-https://rowan2005321.github.io/CS-learning/**
+## 8. Configure GitHub Pages variables
+
+The deployment workflow supports GitHub Secrets first and repository Variables as a fallback:
+
+```yaml
+env:
+  VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+  VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
 ```
 
-When Supabase Auth is configured, `/courses/`, `/projects/`, and `/study-log/` are protected product areas. Signed-out visitors are redirected to `/account/?redirectTo=courses`, `/account/?redirectTo=projects`, or `/account/?redirectTo=study-log`, and successful email/password or Google sign-in returns them to the requested page.
+Recommended production setup:
 
-If Supabase is not configured, those protected pages show a configuration prompt instead of failing open. Course and project catalog data is still bundled in frontend JavaScript, so this protects the UI flow rather than truly hiding catalog bytes. Move catalog data into Supabase or an API backend if true data hiding becomes a requirement.
+- Store `VITE_SUPABASE_URL` as a GitHub Secret.
+- Store `VITE_SUPABASE_PUBLISHABLE_KEY` as a GitHub Secret.
+- Keep repository Variables only as a fallback if they already exist.
 
-## 5. Configure hosted GitHub Pages
+These keys are public browser config, not service role credentials. Still, avoid pasting them into issues or screenshots.
 
-For GitHub Pages builds, add repository secrets or environment variables for:
+## 9. Troubleshooting table
 
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY`
+| Symptom | Likely cause | Check |
+| --- | --- | --- |
+| QQ Mail does not receive codes | Default Supabase email service, poor sender reputation, spam filtering | Configure Custom SMTP, check spam folder, check Auth Logs |
+| Gmail does not receive codes | Rate limit, unverified sender, template missing token | Check SMTP logs, SPF/DKIM/DMARC, and `{{ .Token }}` |
+| Email lands in spam | Sender domain is not authenticated | Configure SPF, DKIM, DMARC |
+| PC login does not return to the app | Missing GitHub Pages redirect URL or wrong base path | Add `https://rowan2005321.github.io/CS-learning/**` |
+| Google `redirect_uri_mismatch` | Google OAuth callback URI is wrong | Add `https://your-project-ref.supabase.co/auth/v1/callback` in Google Cloud |
+| `Email rate limit exceeded` | Too many OTP requests | Wait for cooldown and check Supabase rate limits |
+| `Email address not authorized` | Existing-account OTP login was used before sign-up | Register first, then sign in |
+| `Supabase not configured` | Missing build-time env variables | Check GitHub Actions env and local `.env.local` |
 
-Then update `.github/workflows/deploy-pages.yml` to expose those values during `npm run build` if cloud sync should be active on the hosted site.
+## 10. Manual smoke check
 
-## 6. Auth notes
+Run:
 
-Supabase email sign-up may require email confirmation depending on the Auth settings in the dashboard. If email confirmation is enabled, users must confirm their email before logging in.
+```powershell
+npm.cmd run auth:smoke
+```
 
-Do not put the Supabase `service_role` key in any Vite environment variable. The browser should only receive the publishable key.
+The script checks whether the expected public Supabase variables are present and prints recommended redirect URLs. It does not send real OTP emails by default.
 
-## 7. Future migrations
+## 11. Future migrations
 
-Keep migrations additive whenever possible:
+Keep changes additive:
 
-- Add new nullable columns first, backfill data, then add stricter constraints later.
-- Keep localStorage as the fallback source for anonymous users.
-- Keep course catalog data in `src/data/courses.js` until an admin workflow exists.
-- Use the mapper functions in `src/services/cloudDataMappers.js` when adding or renaming Supabase fields.
-- Never expose service role keys in Vite environment variables.
+- Prefer `create table if not exists`.
+- Prefer `alter table ... add column if not exists`.
+- Keep RLS enabled.
+- Keep localStorage as the fallback for signed-out users.
+- Keep mapper changes in `src/services/cloudDataMappers.js`.
+- Never expose service role keys in frontend code.
