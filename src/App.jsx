@@ -8,6 +8,7 @@ import {
   isProtectedPage,
   readInitialFilters,
   readInitialLanguage,
+  readAccountRedirectPage,
   readRedirectPage,
   writeFiltersToUrl,
   writeLanguageToUrl
@@ -131,7 +132,7 @@ export function App({ pageId = PAGE_IDS.home }) {
   const showDisciplineMap = pageId === PAGE_IDS.tracks;
   const showProjects = pageId === PAGE_IDS.projects;
   const showSources = pageId === PAGE_IDS.sources;
-  const accountRedirectPage = showAccount ? readRedirectPage(PAGE_IDS.courses) : PAGE_IDS.studyLog;
+  const accountRedirectPage = showAccount ? readAccountRedirectPage() : PAGE_IDS.studyLog;
   const authSuccessPage = accountRedirectPage ?? PAGE_IDS.studyLog;
   const authSuccessHref = buildPageHref(authSuccessPage, lang);
   const authSuccessUrl = buildAuthRedirectUrl(authSuccessPage, lang);

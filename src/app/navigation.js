@@ -119,6 +119,10 @@ export function readRedirectPage(fallbackPageId = PAGE_IDS.studyLog, search) {
   return fallbackPageId;
 }
 
+export function readAccountRedirectPage(search) {
+  return readRedirectPage(PAGE_IDS.studyLog, search);
+}
+
 export function buildNavLinks(lang) {
   return [
     { pageId: PAGE_IDS.home, href: buildPageHref(PAGE_IDS.home, lang) },

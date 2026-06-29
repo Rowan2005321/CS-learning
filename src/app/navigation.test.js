@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAGE_IDS, getSiteRootPath, isProtectedPage, readRedirectPage } from "./navigation";
+import { PAGE_IDS, getSiteRootPath, isProtectedPage, readAccountRedirectPage, readRedirectPage } from "./navigation";
 
 describe("getSiteRootPath", () => {
   it("returns the GitHub Pages project root from nested multi-page paths", () => {
@@ -20,6 +20,9 @@ describe("auth redirects", () => {
     expect(isProtectedPage(PAGE_IDS.courses)).toBe(true);
     expect(isProtectedPage(PAGE_IDS.projects)).toBe(true);
     expect(isProtectedPage(PAGE_IDS.tracks)).toBe(false);
+  });
+  it("defaults account auth success to the personal study log", () => {
+    expect(readAccountRedirectPage("?lang=zh")).toBe(PAGE_IDS.studyLog);
   });
 
   it("reads only known non-account page ids from redirectTo", () => {
