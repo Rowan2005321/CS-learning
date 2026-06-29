@@ -9,6 +9,7 @@ function createMockClient(overrides = {}) {
       getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
       refreshSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
       signInWithOAuth: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      signUp: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
       signInWithOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
       signInWithPassword: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
       signOut: vi.fn().mockResolvedValue({ error: null }),
@@ -31,6 +32,21 @@ describe("createAuthActions", () => {
       options: {
         emailRedirectTo: "http://localhost:5173/study-log/?lang=zh",
         shouldCreateUser: true
+      }
+    });
+  });
+
+  it("signUpWithPassword calls signUp with a safe redirect URL", async () => {
+    const client = createMockClient();
+    const actions = createAuthActions({ client, isConfigured: true });
+
+    await actions.signUpWithPassword(" USER@QQ.COM ", "secret123", "study-log");
+
+    expect(client.auth.signUp).toHaveBeenCalledWith({
+      email: "user@qq.com",
+      password: "secret123",
+      options: {
+        emailRedirectTo: "http://localhost:5173/study-log/?lang=zh"
       }
     });
   });

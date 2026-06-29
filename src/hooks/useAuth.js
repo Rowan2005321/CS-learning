@@ -71,6 +71,21 @@ export function createAuthActions({
     );
   }
 
+  async function signUpWithPassword(email, password, redirectTo) {
+    if (!isConfigured || !client) return handleMissingConfig();
+    const normalizedEmail = normalizeEmail(email);
+
+    return handleResult(
+      await client.auth.signUp({
+        email: normalizedEmail,
+        password,
+        options: {
+          emailRedirectTo: getSafeRedirectUrl(redirectTo, lang)
+        }
+      })
+    );
+  }
+
   async function sendSignInOtp(email, redirectTo) {
     if (!isConfigured || !client) return handleMissingConfig();
     const normalizedEmail = normalizeEmail(email);
@@ -141,6 +156,7 @@ export function createAuthActions({
     refreshSession,
     sendSignInOtp,
     sendSignUpOtp,
+    signUpWithPassword,
     setPassword,
     signInWithGoogle,
     signInWithPassword,

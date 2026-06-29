@@ -157,6 +157,29 @@ export function AuthPanel({
     onAuthSuccess?.();
   }
 
+  async function handlePasswordSignUp() {
+    setLocalStatus("");
+    dispatchAuthEvent(AUTH_EVENTS.signUpPassword);
+
+    const result = await auth.signUpWithPassword(email, password, oauthRedirectUrl);
+    if (result.error) {
+      handleAuthError(result.error);
+      return;
+    }
+
+    setPassword("");
+
+    if (result.data?.session) {
+      dispatchAuthEvent(AUTH_EVENTS.otpVerified);
+      setLocalStatus(t.authSignedIn);
+      onAuthSuccess?.();
+      return;
+    }
+
+    dispatchAuthEvent(AUTH_EVENTS.reset);
+    setLocalStatus(t.authCheckEmail);
+  }
+
   async function handlePasswordSignIn() {
     setLocalStatus("");
     dispatchAuthEvent(AUTH_EVENTS.signInPassword);
@@ -175,6 +198,11 @@ export function AuthPanel({
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    if (activeTab === AUTH_TABS.signUp) {
+      await handlePasswordSignUp();
+      return;
+    }
 
     if (activeTab === AUTH_TABS.passwordLogin) {
       await handlePasswordSignIn();
@@ -206,11 +234,13 @@ export function AuthPanel({
         ? t.passwordLoginTitle
         : t.signUpWithOtpTitle;
   const primaryButtonLabel =
-    activeTab === AUTH_TABS.passwordLogin
-      ? t.signIn
-      : isCodeStep
-        ? t.verifyOtp
-        : t.sendOtp;
+    activeTab === AUTH_TABS.signUp
+      ? t.signUp
+      : activeTab === AUTH_TABS.passwordLogin
+        ? t.signIn
+        : isCodeStep
+          ? t.verifyOtp
+          : t.sendOtp;
   const resendLabel =
     cooldown > 0 ? formatStatus(t.resendInSeconds, { seconds: cooldown }) : t.resendOtp;
   const showPasswordFallbackTip =

@@ -13,6 +13,7 @@ function createAuth(overrides = {}) {
     isLoading: false,
     sendSignInOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
     sendSignUpOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
+    signUpWithPassword: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
     setPassword: vi.fn().mockResolvedValue({ data: {}, error: null }),
     signInWithGoogle: vi.fn().mockResolvedValue({ data: {}, error: null }),
     signInWithPassword: vi.fn().mockResolvedValue({ data: { session: {} }, error: null }),
@@ -46,7 +47,7 @@ describe("AuthPanel", () => {
     cleanup();
   });
 
-  it("can send an OTP in sign-up mode", async () => {
+  it("creates an account with email and password in sign-up mode", async () => {
     const user = userEvent.setup();
     const auth = createAuth();
     renderAuthPanel(auth);
@@ -54,12 +55,32 @@ describe("AuthPanel", () => {
     await user.click(screen.getByRole("tab", { name: labels.en.authTabSignUp }));
     await user.type(screen.getByLabelText(labels.en.email), "NewUser@QQ.COM");
     await user.type(screen.getByLabelText(labels.en.password), "secret123");
-    await user.click(screen.getByRole("button", { name: labels.en.sendOtp }));
+    await user.click(screen.getByRole("button", { name: labels.en.signUp }));
 
-    await waitFor(() => expect(auth.sendSignUpOtp).toHaveBeenCalledWith(
-      "NewUser@QQ.COM",
-      "http://localhost:5173/study-log/?lang=en"
-    ));
+    await waitFor(() =>
+      expect(auth.signUpWithPassword).toHaveBeenCalledWith(
+        "NewUser@QQ.COM",
+        "secret123",
+        "http://localhost:5173/study-log/?lang=en"
+      )
+    );
+    expect(auth.sendSignUpOtp).not.toHaveBeenCalled();
+  });
+
+  it("keeps sign-up usable when email confirmation is required", async () => {
+    const user = userEvent.setup();
+    const auth = createAuth({
+      signUpWithPassword: vi.fn().mockResolvedValue({ data: { user: {} }, error: null })
+    });
+    renderAuthPanel(auth);
+
+    await user.click(screen.getByRole("tab", { name: labels.en.authTabSignUp }));
+    await user.type(screen.getByLabelText(labels.en.email), "confirm@example.com");
+    await user.type(screen.getByLabelText(labels.en.password), "secret123");
+    await user.click(screen.getByRole("button", { name: labels.en.signUp }));
+
+    expect(await screen.findByText(labels.en.authCheckEmail)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: labels.en.signUp })).not.toBeDisabled();
   });
 
   it("limits OTP input to six digits", async () => {

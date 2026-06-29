@@ -21,6 +21,7 @@ export const AUTH_EVENTS = {
   otpVerified: "OTP_VERIFIED",
   setPassword: "SET_PASSWORD",
   passwordSet: "PASSWORD_SET",
+  signUpPassword: "SIGN_UP_PASSWORD",
   signInPassword: "SIGN_IN_PASSWORD",
   signInOtp: "SIGN_IN_OTP",
   googleSignIn: "GOOGLE_SIGN_IN",
@@ -55,6 +56,7 @@ export function transitionAuthState(currentState, event) {
     case AUTH_STATES.error:
     case AUTH_STATES.rateLimited:
       if (eventType === AUTH_EVENTS.sendOtp) return AUTH_STATES.sendingOtp;
+      if (eventType === AUTH_EVENTS.signUpPassword) return AUTH_STATES.signingIn;
       if (eventType === AUTH_EVENTS.signInPassword) return AUTH_STATES.signingIn;
       if (eventType === AUTH_EVENTS.signInOtp) return AUTH_STATES.sendingOtp;
       if (eventType === AUTH_EVENTS.googleSignIn) return AUTH_STATES.oauthRedirecting;
