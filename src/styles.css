@@ -1658,16 +1658,69 @@ button.heatmap-day {
   color: var(--ink);
 }
 
+.project-toolbar {
+  display: grid;
+  gap: 14px;
+}
+
+.project-track-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-track-tabs button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 8px 12px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.project-track-tabs button.is-active {
+  border-color: rgba(15, 143, 131, 0.35);
+  background: #e9f7f5;
+  color: var(--teal);
+}
+
+.project-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 560px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 12px;
+  color: var(--muted);
+}
+
+.project-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  padding: 12px 0;
+}
+
+.project-auth-note {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
 .project-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
   gap: 16px;
 }
 
 .project-card {
   display: grid;
   align-content: start;
-  gap: 12px;
+  gap: 14px;
   min-height: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1676,24 +1729,31 @@ button.heatmap-day {
   text-align: left;
 }
 
-.project-card-header {
+.project-card-header,
+.project-actions,
+.project-form-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.project-card-header {
   justify-content: space-between;
-  gap: 12px;
 }
 
 .project-index {
   display: inline-grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--soft);
   font-weight: 900;
 }
 
-.project-status {
+.project-status,
+.locked-copy {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1702,9 +1762,27 @@ button.heatmap-day {
   font-weight: 850;
 }
 
-.project-card h3 {
+.project-status.available,
+.project-status.completed {
+  color: var(--teal);
+}
+
+.project-status.in_progress,
+.project-status.submitted {
+  color: #b76b00;
+}
+
+.project-card h3,
+.project-card h4 {
   margin: 0;
+}
+
+.project-card h3 {
   font-size: 17px;
+}
+
+.project-card h4 {
+  font-size: 14px;
 }
 
 .project-card p {
@@ -1714,14 +1792,22 @@ button.heatmap-day {
   line-height: 1.45;
 }
 
+.project-card-title {
+  display: grid;
+  gap: 5px;
+}
+
 .project-meta,
-.project-recommendations div {
+.project-track-tags,
+.project-recommendations div,
+.project-submission-summary div {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
 .project-meta span,
+.project-track-tags span,
 .project-recommendations code,
 .project-repo code {
   border: 1px solid var(--line);
@@ -1737,7 +1823,9 @@ button.heatmap-day {
 .project-detail-block,
 .project-portfolio,
 .project-recommendations,
-.project-repo {
+.project-repo,
+.project-requirements,
+.project-submission-summary {
   display: grid;
   gap: 7px;
 }
@@ -1746,14 +1834,21 @@ button.heatmap-day {
 .project-detail-block span,
 .project-portfolio strong,
 .project-recommendations > span,
-.project-repo > span {
+.project-repo > span,
+.project-requirements strong,
+.project-submission-summary strong {
   color: var(--ink);
   font-size: 12px;
   font-weight: 900;
 }
 
 .project-audience span,
-.project-portfolio span {
+.project-portfolio span,
+.project-requirements span,
+.project-requirements small,
+.project-community,
+.project-submission-summary span,
+.project-submission-summary small {
   color: var(--muted);
   font-size: 13px;
   line-height: 1.45;
@@ -1775,16 +1870,77 @@ button.heatmap-day {
   border-radius: 7px;
 }
 
-.project-card.completed svg {
-  color: var(--teal);
-}
-
-.project-card.active {
-  border-color: rgba(239, 170, 52, 0.7);
-}
-
 .project-card.locked {
-  opacity: 0.62;
+  background: #fbfcfc;
+  opacity: 0.72;
+}
+
+.project-card.submitted {
+  border-color: rgba(239, 170, 52, 0.6);
+}
+
+.project-expanded {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.project-detail-grid,
+.project-forms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.project-progress-form,
+.project-submission-form {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfc;
+  padding: 14px;
+}
+
+.project-field {
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.project-field input,
+.project-field select,
+.project-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 10px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.project-field textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.project-submission-summary {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.project-submission-summary a {
+  color: var(--teal);
+  font-weight: 850;
 }
 
 .sources-section {
@@ -2241,6 +2397,8 @@ button.heatmap-day {
 
   .proof-row,
   .discipline-grid,
+  .project-detail-grid,
+  .project-forms,
   .project-strip,
   .course-card-grid,
   .mobile-course-cards {

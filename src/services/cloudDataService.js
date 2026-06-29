@@ -1,14 +1,17 @@
 import { supabase } from "../lib/supabaseClient";
 import {
   fromCourseStateRows,
+  fromProjectSubmissionRow,
   fromProjectProgressRow,
   fromStudyPlanRow,
   fromStudyLogRow,
   toCourseStateRows,
   toLegacyCourseStateRows,
+  toLegacyProjectProgressRows,
   toLegacyStudyPlanRow,
   toLegacyStudyLogRows,
   toMilestoneLogRow,
+  toProjectSubmissionRow,
   toProjectProgressRow,
   toStudyPlanRow,
   toStudyLogRow
@@ -24,6 +27,10 @@ function requireClient() {
 
 function isMissingColumnError(error) {
   return error?.code === "42703" || /column .* does not exist/i.test(error?.message ?? "");
+}
+
+function isMissingTableError(error) {
+  return error?.code === "42P01" || /relation .* does not exist/i.test(error?.message ?? "");
 }
 
 export async function saveCourseStateToCloud(userId, savedIds, completedIds, courseIds) {
@@ -169,19 +176,71 @@ export async function saveProjectProgressToCloud(userId, progressEntries) {
     .upsert(rows, { onConflict: "user_id,project_id" })
     .select();
 
-  if (error) throw error;
-  return data;
+  if (!error) return data;
+  if (!isMissingColumnError(error)) throw error;
+
+  const legacy = await client
+    .from("user_project_progress")
+    .upsert(toLegacyProjectProgressRows(rows), { onConflict: "user_id,project_id" })
+    .select();
+
+  if (legacy.error) throw legacy.error;
+  return legacy.data;
 }
 
 export async function loadProjectProgressFromCloud(userId) {
   const client = requireClient();
-  const { data, error } = await client
+  const result = await client
     .from("user_project_progress")
-    .select("project_id,milestone_id,status,completed,current_step,reflection,started_at,completed_at")
+    .select(
+      "project_id,milestone_id,status,completed,current_step,reflection,blockers,next_step,started_at,submitted_at,completed_at"
+    )
     .eq("user_id", userId);
 
+  if (!result.error) return result.data.map(fromProjectProgressRow);
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
+    .from("user_project_progress")
+    .select(
+      "project_id,milestone_id,status,completed,current_step,reflection,started_at,completed_at"
+    )
+    .eq("user_id", userId);
+
+  if (legacy.error) throw legacy.error;
+  return legacy.data.map(fromProjectProgressRow);
+}
+
+export async function saveProjectSubmissionToCloud(userId, submission) {
+  const client = requireClient();
+  const row = toProjectSubmissionRow(userId, submission);
+  const { data, error } = await client
+    .from("project_submissions")
+    .upsert(row, { onConflict: "id" })
+    .select()
+    .single();
+
   if (error) throw error;
-  return data.map(fromProjectProgressRow);
+  return fromProjectSubmissionRow(data);
+}
+
+export async function loadProjectSubmissionsFromCloud(userId) {
+  const client = requireClient();
+  const { data, error } = await client
+    .from("project_submissions")
+    .select(
+      "id,project_id,title,github_url,demo_url,description,reflection,review_request,visibility,status,reviewer_feedback,created_at,updated_at"
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (isMissingTableError(error)) return [];
+  if (error) throw error;
+  return data.map(fromProjectSubmissionRow);
+}
+
+export async function updateProjectSubmissionToCloud(userId, submission) {
+  return saveProjectSubmissionToCloud(userId, submission);
 }
 
 export async function saveMilestoneLogToCloud(userId, log) {

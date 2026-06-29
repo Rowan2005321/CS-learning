@@ -66,17 +66,19 @@ export function toStudyLogRow(userId, entry) {
 }
 
 export function toLegacyStudyLogRows(rows) {
-  return rows.map(({ created_at, date, hours, id, next_step, note, topic, updated_at, user_id }) => ({
-    created_at,
-    date,
-    hours,
-    id,
-    next_step,
-    note,
-    topic,
-    updated_at,
-    user_id
-  }));
+  return rows.map(
+    ({ created_at, date, hours, id, next_step, note, topic, updated_at, user_id }) => ({
+      created_at,
+      date,
+      hours,
+      id,
+      next_step,
+      note,
+      topic,
+      updated_at,
+      user_id
+    })
+  );
 }
 
 export function fromStudyLogRow(row) {
@@ -135,29 +137,100 @@ export function fromStudyPlanRow(row) {
 
 export function toProjectProgressRow(userId, progress) {
   return {
+    blockers: progress.blockers ?? "",
     completed: Boolean(progress.completed),
     completed_at: progress.completedAt || null,
     current_step: progress.currentStep ?? "",
     milestone_id: progress.milestoneId || progress.projectId,
+    next_step: progress.nextStep ?? "",
     project_id: progress.projectId,
     reflection: progress.reflection ?? "",
     started_at: progress.startedAt || new Date().toISOString(),
     status: progress.status ?? (progress.completed ? "completed" : "in_progress"),
+    submitted_at: progress.submittedAt || null,
     updated_at: new Date().toISOString(),
     user_id: userId
   };
 }
 
+export function toLegacyProjectProgressRows(rows) {
+  return rows.map(
+    ({
+      completed,
+      completed_at,
+      current_step,
+      milestone_id,
+      project_id,
+      reflection,
+      started_at,
+      status,
+      updated_at,
+      user_id
+    }) => ({
+      completed,
+      completed_at,
+      current_step,
+      milestone_id,
+      project_id,
+      reflection,
+      started_at,
+      status,
+      updated_at,
+      user_id
+    })
+  );
+}
+
 export function fromProjectProgressRow(row) {
   return {
+    blockers: row.blockers ?? "",
     completed: Boolean(row.completed),
     completedAt: row.completed_at ?? "",
     currentStep: row.current_step ?? "",
     milestoneId: row.milestone_id ?? row.project_id,
+    nextStep: row.next_step ?? "",
     projectId: row.project_id,
     reflection: row.reflection ?? "",
     startedAt: row.started_at ?? "",
+    submittedAt: row.submitted_at ?? "",
     status: row.status ?? "not_started"
+  };
+}
+
+export function toProjectSubmissionRow(userId, submission) {
+  return {
+    created_at: submission.createdAt || new Date().toISOString(),
+    demo_url: submission.demoUrl || null,
+    description: submission.description ?? "",
+    github_url: submission.githubUrl || null,
+    id: submission.id,
+    project_id: submission.projectId,
+    reflection: submission.reflection ?? "",
+    review_request: submission.reviewRequest ?? "",
+    reviewer_feedback: submission.reviewerFeedback ?? "",
+    status: submission.status ?? "submitted",
+    title: submission.title,
+    updated_at: new Date().toISOString(),
+    user_id: userId,
+    visibility: submission.visibility ?? "private"
+  };
+}
+
+export function fromProjectSubmissionRow(row) {
+  return {
+    createdAt: row.created_at,
+    demoUrl: row.demo_url ?? "",
+    description: row.description ?? "",
+    githubUrl: row.github_url ?? "",
+    id: row.id,
+    projectId: row.project_id,
+    reflection: row.reflection ?? "",
+    reviewRequest: row.review_request ?? "",
+    reviewerFeedback: row.reviewer_feedback ?? "",
+    status: row.status ?? "submitted",
+    title: row.title,
+    updatedAt: row.updated_at ?? "",
+    visibility: row.visibility ?? "private"
   };
 }
 

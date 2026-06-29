@@ -26,24 +26,25 @@ import { SourcesSection } from "./components/SourcesSection";
 import { StudyLogPanel } from "./components/StudyLogPanel";
 import { courses, tracks } from "./data/courses";
 import { labels } from "./data/labels";
-import { projects } from "./data/projects";
+import { projectTracks, projects } from "./data/projects";
 import { stages } from "./data/stages";
 import { useAuth } from "./hooks/useAuth";
 import { useCoursePlannerWorker } from "./hooks/useCoursePlannerWorker";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import {
   loadCourseStateFromCloud,
+  loadProjectProgressFromCloud,
+  loadProjectSubmissionsFromCloud,
   loadStudyPlanFromCloud,
   loadStudyLogsFromCloud,
   saveCourseStateToCloud,
+  saveProjectProgressToCloud,
+  saveProjectSubmissionToCloud,
   saveStudyPlanToCloud,
   saveStudyLogsToCloud
 } from "./services/cloudDataService";
-import {
-  createStudyLogState,
-  mergeStudyLogEntries,
-  migrateStudyLogState
-} from "./utils/studyLog";
+import { createStudyLogState, mergeStudyLogEntries, migrateStudyLogState } from "./utils/studyLog";
+import { PROJECT_STATUSES } from "./utils/projectStatus";
 
 function toggleId(list, id) {
   return list.includes(id) ? list.filter((item) => item !== id) : [...list, id];
@@ -78,6 +79,14 @@ function toAbsoluteHref(href) {
   return new URL(href, window.location.origin).toString();
 }
 
+function createClientId(prefix) {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export function App({ pageId = PAGE_IDS.home }) {
   const auth = useAuth();
   const [lang, setLang] = useLocalStorage("open-cs-atlas-lang", readInitialLanguage());
@@ -85,6 +94,14 @@ export function App({ pageId = PAGE_IDS.home }) {
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
   const [weeklyHours, setWeeklyHours] = useLocalStorage("open-cs-atlas-weekly-hours", 8);
   const [viewMode, setViewMode] = useLocalStorage("open-cs-atlas-view-mode", "table");
+  const [userProjectProgress, setUserProjectProgress] = useLocalStorage(
+    "open-cs-atlas-project-progress",
+    []
+  );
+  const [projectSubmissions, setProjectSubmissions] = useLocalStorage(
+    "open-cs-atlas-project-submissions",
+    []
+  );
   const [studyLogState, setStudyLogState] = useLocalStorage(
     "open-cs-atlas-study-logs",
     createStudyLogState()
@@ -122,7 +139,9 @@ export function App({ pageId = PAGE_IDS.home }) {
   const authSuccessPage = accountRedirectPage ?? PAGE_IDS.studyLog;
   const authSuccessHref = buildPageHref(authSuccessPage, lang);
   const authSuccessUrl = toAbsoluteHref(authSuccessHref);
-  const shouldBlockProtectedPage = isProtectedPage(pageId) && auth.isConfigured && !auth.user;
+  const shouldBlockForMissingAuthConfig = isProtectedPage(pageId) && !auth.isConfigured;
+  const shouldBlockForSignIn = isProtectedPage(pageId) && auth.isConfigured && !auth.user;
+  const shouldBlockProtectedPage = shouldBlockForMissingAuthConfig || shouldBlockForSignIn;
 
   useEffect(() => {
     const queryLang = new URLSearchParams(window.location.search).get("lang");
@@ -251,6 +270,14 @@ export function App({ pageId = PAGE_IDS.home }) {
     window.location.assign(authSuccessHref);
   }
 
+  function redirectToAccount(targetPageId = pageId) {
+    window.location.assign(
+      buildPageHref(PAGE_IDS.account, lang, {
+        redirectTo: targetPageId
+      })
+    );
+  }
+
   function addStudyLog(entry) {
     setStudyLogState((current) => {
       const migrated = migrateStudyLogState(current);
@@ -272,6 +299,111 @@ export function App({ pageId = PAGE_IDS.home }) {
     });
   }
 
+  async function persistProjectProgress(nextProgress) {
+    if (!auth.user) return;
+
+    try {
+      await saveProjectProgressToCloud(auth.user.id, nextProgress);
+    } catch (error) {
+      setCloudStatus(error.message);
+    }
+  }
+
+  async function updateProjectProgress(projectId, updates) {
+    if (!auth.user) {
+      redirectToAccount(PAGE_IDS.projects);
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const existing = userProjectProgress.find((entry) => entry.projectId === projectId);
+    const status = updates.status ?? existing?.status ?? PROJECT_STATUSES.inProgress;
+    const nextEntry = {
+      blockers: existing?.blockers ?? "",
+      completed: existing?.completed ?? false,
+      completedAt: existing?.completedAt ?? "",
+      currentStep: existing?.currentStep ?? "",
+      milestoneId: projectId,
+      nextStep: existing?.nextStep ?? "",
+      projectId,
+      reflection: existing?.reflection ?? "",
+      startedAt: existing?.startedAt || now,
+      submittedAt: existing?.submittedAt ?? "",
+      ...updates,
+      status,
+      updatedAt: now
+    };
+
+    if (status === PROJECT_STATUSES.submitted && !nextEntry.submittedAt) {
+      nextEntry.submittedAt = now;
+    }
+
+    if (status === PROJECT_STATUSES.completed) {
+      nextEntry.completed = true;
+      nextEntry.completedAt = nextEntry.completedAt || now;
+    }
+
+    const nextProgress = existing
+      ? userProjectProgress.map((entry) => (entry.projectId === projectId ? nextEntry : entry))
+      : [...userProjectProgress, nextEntry];
+
+    setUserProjectProgress(nextProgress);
+    await persistProjectProgress(nextProgress);
+  }
+
+  function startProject(projectId) {
+    return updateProjectProgress(projectId, {
+      status: PROJECT_STATUSES.inProgress
+    });
+  }
+
+  async function submitProject(projectId, submissionDraft) {
+    if (!auth.user) {
+      redirectToAccount(PAGE_IDS.projects);
+      return;
+    }
+
+    const now = new Date().toISOString();
+    const submission = {
+      createdAt: now,
+      demoUrl: submissionDraft.demoUrl ?? "",
+      description: submissionDraft.description ?? "",
+      githubUrl: submissionDraft.githubUrl ?? "",
+      id: createClientId("project-submission"),
+      projectId,
+      reflection: submissionDraft.reflection ?? "",
+      reviewRequest: submissionDraft.reviewRequest ?? "",
+      reviewerFeedback: "",
+      status: "submitted",
+      title: submissionDraft.title,
+      updatedAt: now,
+      visibility: submissionDraft.visibility ?? "private"
+    };
+
+    setProjectSubmissions((current) => [submission, ...current]);
+
+    try {
+      const cloudSubmission = await saveProjectSubmissionToCloud(auth.user.id, submission);
+      setProjectSubmissions((current) =>
+        current.map((entry) => (entry.id === submission.id ? cloudSubmission : entry))
+      );
+      await updateProjectProgress(projectId, {
+        status: PROJECT_STATUSES.submitted,
+        submittedAt: now
+      });
+    } catch (error) {
+      setCloudStatus(error.message);
+    }
+  }
+
+  function markProjectCompleted(projectId) {
+    return updateProjectProgress(projectId, {
+      completed: true,
+      completedAt: new Date().toISOString(),
+      status: PROJECT_STATUSES.completed
+    });
+  }
+
   async function saveLocalDataToCloud() {
     if (!auth.user) return;
 
@@ -287,6 +419,10 @@ export function App({ pageId = PAGE_IDS.home }) {
       );
       await saveStudyPlanToCloud(auth.user.id, { filters, weeklyHours });
       await saveStudyLogsToCloud(auth.user.id, studyLogs);
+      await saveProjectProgressToCloud(auth.user.id, userProjectProgress);
+      for (const submission of projectSubmissions) {
+        await saveProjectSubmissionToCloud(auth.user.id, submission);
+      }
       setCloudStatus(t.cloudSaved);
     } catch (error) {
       setCloudStatus(error.message);
@@ -305,9 +441,13 @@ export function App({ pageId = PAGE_IDS.home }) {
       const courseState = await loadCourseStateFromCloud(auth.user.id);
       const cloudPlan = await loadStudyPlanFromCloud(auth.user.id);
       const cloudLogs = await loadStudyLogsFromCloud(auth.user.id);
+      const cloudProjectProgress = await loadProjectProgressFromCloud(auth.user.id);
+      const cloudProjectSubmissions = await loadProjectSubmissionsFromCloud(auth.user.id);
 
       setSavedIds(courseState.savedIds);
       setCompletedIds(courseState.completedIds);
+      setUserProjectProgress(cloudProjectProgress);
+      setProjectSubmissions(cloudProjectSubmissions);
       if (cloudPlan) {
         setWeeklyHours(cloudPlan.weeklyHours);
         setFilters((current) => ({
@@ -335,6 +475,36 @@ export function App({ pageId = PAGE_IDS.home }) {
         t={t}
       />
       <main>
+        {shouldBlockForMissingAuthConfig ? (
+          <section className="auth-section auth-guard" id={pageId}>
+            <div className="auth-copy">
+              <span>{t.accountEyebrow}</span>
+              <h2>{t.authSystemMissingTitle}</h2>
+              <p>{t.authSystemMissingText}</p>
+            </div>
+          </section>
+        ) : null}
+
+        {shouldBlockForSignIn ? (
+          <section className="auth-section auth-guard" id={pageId}>
+            <div className="auth-copy">
+              <span>{t.accountEyebrow}</span>
+              <h2>{t.authGuardTitle}</h2>
+              <p>{t.authGuardText}</p>
+            </div>
+            <div className="auth-card">
+              <a
+                className="button primary"
+                href={buildPageHref(PAGE_IDS.account, lang, {
+                  redirectTo: pageId
+                })}
+              >
+                {t.signIn} / {t.signUp}
+              </a>
+            </div>
+          </section>
+        ) : null}
+
         {showHero ? (
           <Hero activeTrack={filters.track} lang={lang} t={t} onSelectTrack={selectTrack} />
         ) : null}
@@ -366,7 +536,9 @@ export function App({ pageId = PAGE_IDS.home }) {
           />
         ) : null}
 
-        {showCourses ? (
+        {/* Course and project catalogs are still bundled in frontend JS.
+            This auth guard protects the UI flow; true catalog secrecy would require moving catalog queries server-side. */}
+        {showCourses && !shouldBlockProtectedPage ? (
           <section className="courses-section" id="courses">
             <CourseFilters
               filters={filters}
@@ -417,9 +589,7 @@ export function App({ pageId = PAGE_IDS.home }) {
                     savedIds={savedIds}
                     completedIds={completedIds}
                     onToggleSaved={(id) => setSavedIds((current) => toggleId(current, id))}
-                    onToggleCompleted={(id) =>
-                      setCompletedIds((current) => toggleId(current, id))
-                    }
+                    onToggleCompleted={(id) => setCompletedIds((current) => toggleId(current, id))}
                   />
                 ) : (
                   <div className="course-card-grid">
@@ -446,26 +616,6 @@ export function App({ pageId = PAGE_IDS.home }) {
           </section>
         ) : null}
 
-        {showStudyLog && shouldBlockProtectedPage ? (
-          <section className="auth-section auth-guard" id="study-log">
-            <div className="auth-copy">
-              <span>{t.accountEyebrow}</span>
-              <h2>{t.authGuardTitle}</h2>
-              <p>{t.authGuardText}</p>
-            </div>
-            <div className="auth-card">
-              <a
-                className="button primary"
-                href={buildPageHref(PAGE_IDS.account, lang, {
-                  redirectTo: PAGE_IDS.studyLog
-                })}
-              >
-                {t.signIn} / {t.signUp}
-              </a>
-            </div>
-          </section>
-        ) : null}
-
         {showStudyLog && !shouldBlockProtectedPage ? (
           <StudyLogPanel
             logs={studyLogs}
@@ -485,7 +635,23 @@ export function App({ pageId = PAGE_IDS.home }) {
           />
         ) : null}
 
-        {showProjects ? <ProjectMilestones projects={projects} lang={lang} t={t} /> : null}
+        {showProjects && !shouldBlockProtectedPage ? (
+          <ProjectMilestones
+            auth={auth}
+            completedIds={completedIds}
+            courses={courses}
+            lang={lang}
+            projectSubmissions={projectSubmissions}
+            projectTracks={projectTracks}
+            projects={projects}
+            t={t}
+            userProjectProgress={userProjectProgress}
+            onMarkProjectCompleted={markProjectCompleted}
+            onStartProject={startProject}
+            onSubmitProject={submitProject}
+            onUpdateProjectProgress={updateProjectProgress}
+          />
+        ) : null}
         {showSources ? <SourcesSection courses={courses} lang={lang} t={t} /> : null}
       </main>
       <Footer t={t} />

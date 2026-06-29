@@ -12,6 +12,7 @@ describe("supabase schema", () => {
       "study_plans",
       "study_plan_items",
       "user_project_progress",
+      "project_submissions",
       "user_milestone_logs",
       "project_templates",
       "project_milestones",
@@ -38,6 +39,7 @@ describe("supabase schema", () => {
       "study_plans_user_active_idx",
       "study_plan_items_plan_order_idx",
       "user_project_progress_user_project_idx",
+      "project_submissions_user_project_created_idx",
       "user_milestone_logs_user_project_created_idx"
     ];
 

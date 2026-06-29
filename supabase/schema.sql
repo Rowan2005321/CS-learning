@@ -239,15 +239,36 @@ create table if not exists public.user_project_progress (
   completed boolean not null default false,
   current_step text not null default '',
   reflection text not null default '',
+  blockers text not null default '',
+  next_step text not null default '',
   started_at timestamptz,
+  submitted_at timestamptz,
   completed_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (user_id, project_id)
 );
 
+alter table public.user_project_progress add column if not exists blockers text not null default '';
+alter table public.user_project_progress add column if not exists next_step text not null default '';
+alter table public.user_project_progress add column if not exists submitted_at timestamptz;
+
 do $$
+declare
+  status_constraint record;
 begin
+  select oid, pg_get_constraintdef(oid) as definition
+    into status_constraint
+  from pg_constraint
+  where conname = 'user_project_progress_status_check'
+    and conrelid = 'public.user_project_progress'::regclass;
+
+  if status_constraint.oid is not null
+     and status_constraint.definition not like '%submitted%' then
+    alter table public.user_project_progress
+      drop constraint user_project_progress_status_check;
+  end if;
+
   if not exists (
     select 1 from pg_constraint
     where conname = 'user_project_progress_status_check'
@@ -255,7 +276,58 @@ begin
   ) then
     alter table public.user_project_progress
       add constraint user_project_progress_status_check
-      check (status in ('not_started', 'in_progress', 'completed', 'paused', 'skipped'));
+      check (status in ('not_started', 'in_progress', 'submitted', 'completed', 'paused', 'skipped'));
+  end if;
+end $$;
+
+create table if not exists public.project_submissions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  project_id text not null,
+  title text not null,
+  github_url text,
+  demo_url text,
+  description text not null default '',
+  reflection text not null default '',
+  review_request text not null default '',
+  visibility text not null default 'private',
+  status text not null default 'submitted',
+  reviewer_feedback text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.project_submissions add column if not exists github_url text;
+alter table public.project_submissions add column if not exists demo_url text;
+alter table public.project_submissions add column if not exists description text not null default '';
+alter table public.project_submissions add column if not exists reflection text not null default '';
+alter table public.project_submissions add column if not exists review_request text not null default '';
+alter table public.project_submissions add column if not exists visibility text not null default 'private';
+alter table public.project_submissions add column if not exists status text not null default 'submitted';
+alter table public.project_submissions add column if not exists reviewer_feedback text not null default '';
+alter table public.project_submissions add column if not exists created_at timestamptz not null default now();
+alter table public.project_submissions add column if not exists updated_at timestamptz not null default now();
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'project_submissions_status_check'
+      and conrelid = 'public.project_submissions'::regclass
+  ) then
+    alter table public.project_submissions
+      add constraint project_submissions_status_check
+      check (status in ('submitted', 'reviewed', 'accepted', 'rejected', 'archived'));
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'project_submissions_visibility_check'
+      and conrelid = 'public.project_submissions'::regclass
+  ) then
+    alter table public.project_submissions
+      add constraint project_submissions_visibility_check
+      check (visibility in ('private', 'public'));
   end if;
 end $$;
 
@@ -291,6 +363,10 @@ create index if not exists user_track_states_user_id_idx
   on public.user_track_states (user_id);
 create index if not exists user_project_progress_user_project_idx
   on public.user_project_progress (user_id, project_id);
+create index if not exists project_submissions_user_project_created_idx
+  on public.project_submissions (user_id, project_id, created_at desc);
+create index if not exists project_submissions_user_status_idx
+  on public.project_submissions (user_id, status);
 create index if not exists user_milestone_logs_user_project_created_idx
   on public.user_milestone_logs (user_id, project_id, created_at desc);
 create index if not exists project_milestones_template_order_idx
@@ -305,6 +381,7 @@ alter table public.study_plans enable row level security;
 alter table public.study_plan_items enable row level security;
 alter table public.user_track_states enable row level security;
 alter table public.user_project_progress enable row level security;
+alter table public.project_submissions enable row level security;
 alter table public.user_milestone_logs enable row level security;
 alter table public.project_templates enable row level security;
 alter table public.project_milestones enable row level security;
@@ -336,6 +413,9 @@ begin
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'user_project_progress' and policyname = 'Users can manage their own project progress') then
     execute 'create policy "Users can manage their own project progress" on public.user_project_progress for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id)';
   end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'project_submissions' and policyname = 'Users can manage their own project submissions') then
+    execute 'create policy "Users can manage their own project submissions" on public.project_submissions for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id)';
+  end if;
   if not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'user_milestone_logs' and policyname = 'Users can manage their own milestone logs') then
     execute 'create policy "Users can manage their own milestone logs" on public.user_milestone_logs for all to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id)';
   end if;
@@ -366,6 +446,7 @@ begin
     'study_plan_items',
     'user_track_states',
     'user_project_progress',
+    'project_submissions',
     'user_milestone_logs',
     'project_templates',
     'project_milestones',

@@ -22,7 +22,7 @@ Shared application state and page composition live in `src/App.jsx`.
 
 Legacy hash links such as `/#courses` and `/#study-log` are redirected to real pages.
 
-`/study-log/` is a personal page when Supabase Auth is configured. Signed-out visitors are redirected to `/account/?redirectTo=study-log`; successful email/password or Google sign-in returns them to the requested page. If Supabase is not configured, the page keeps the localStorage-first behavior so static local development is not blocked.
+`/courses/`, `/projects/`, and `/study-log/` are protected product areas when Supabase Auth is configured. Signed-out visitors are redirected to `/account/?redirectTo=courses`, `/account/?redirectTo=projects`, or `/account/?redirectTo=study-log`; successful email/password or Google sign-in returns them to the requested page. If Supabase is not configured, these pages show an account-system configuration prompt instead of failing open.
 
 ## Worker Boundary
 
@@ -44,11 +44,11 @@ Auth is intentionally client-side and publishable-key only. Email/password suppo
 
 The database is split into three groups:
 
-- Local-first user data: `user_course_states`, `study_logs`, `study_plans`, `study_plan_items`, `user_track_states`, `user_project_progress`, and `user_milestone_logs`.
+- Local-first user data: `user_course_states`, `study_logs`, `study_plans`, `study_plan_items`, `user_track_states`, `user_project_progress`, `project_submissions`, and `user_milestone_logs`.
 - User identity extension: `profiles`, linked to `auth.users`.
 - Optional public catalog tables: `project_templates`, `project_milestones`, and `learning_tracks`.
 
-Course catalog data still lives in `src/data/courses.js` so course additions can remain simple GitHub pull requests. The frontend maps Supabase rows through `src/services/cloudDataMappers.js`, which keeps snake_case database fields out of components and preserves compatibility with older deployments that have not run the latest schema yet.
+Course and project catalog data still lives in `src/data/courses.js` and `src/data/projects.js` so additions can remain simple GitHub pull requests. The auth guard protects the UI flow and user operations, but it does not truly hide static catalog data from built JavaScript. True catalog secrecy requires moving catalog queries into Supabase tables or an API backend. The frontend maps Supabase rows through `src/services/cloudDataMappers.js`, which keeps snake_case database fields out of components and preserves compatibility with older deployments that have not run the latest schema yet.
 
 All user-owned tables use RLS policies of the form `(select auth.uid()) = user_id` or `(select auth.uid()) = id`, with indexes on policy and query columns. Public catalog tables have read-only select policies for `anon` and `authenticated`.
 
@@ -58,11 +58,11 @@ If OpenAI Agents SDK support is added later, keep it out of the static Pages bun
 
 ## Project Milestones
 
-Project milestones are stored in `src/data/projects.js` as bilingual portfolio stages. Each milestone should include:
+Project milestones are stored in `src/data/projects.js` as bilingual, multi-track portfolio projects. Each project should include:
 
-- `title`, `description`, `targetAudience`, and `portfolioValue` in English and Chinese.
-- `difficulty`, `estimatedWeeks`, `deliverables`, and `evaluationChecklist`.
-- `recommendedCourses` using ids from `src/data/courses.js`.
-- `githubRepoSuggestion`, `aiAssistedTips`, and `nextMilestoneId`.
+- `trackIds`, `order`, `title`, `subtitle`, `description`, `targetAudience`, and `portfolioValue` in English and Chinese.
+- `difficulty`, `estimatedWeeks`, `estimatedHours`, `deliverables`, `submissionRequirements`, and `evaluationRubric`.
+- `requiredCourses`, `recommendedCourses`, and `unlockCriteria` using ids from `src/data/courses.js`.
+- `reviewQuestions`, `commonPitfalls`, `aiAssistedWorkflow`, `communityCta`, `githubRepoSuggestion`, and `nextProjectIds`.
 
-When project progress becomes editable in the UI, persist user-specific progress to `user_project_progress` and reflection entries to `user_milestone_logs`.
+Do not store `status` in `src/data/projects.js`. Project status is computed by `src/utils/projectStatus.js` from completed courses, completed projects, unlock criteria, and user-owned rows in `user_project_progress`. Project GitHub/demo submissions are stored in `project_submissions`.

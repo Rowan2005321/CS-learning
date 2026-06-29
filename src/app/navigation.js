@@ -29,7 +29,7 @@ const LEGACY_HASH_PAGES = {
 
 const FILTER_QUERY_KEYS = ["q", "discipline", "level", "track"];
 const REDIRECT_QUERY_KEY = "redirectTo";
-const PROTECTED_PAGE_IDS = new Set([PAGE_IDS.studyLog]);
+export const PROTECTED_PAGE_IDS = new Set([PAGE_IDS.courses, PAGE_IDS.studyLog, PAGE_IDS.projects]);
 
 export function isKnownPageId(pageId) {
   return Object.values(PAGE_IDS).includes(pageId);
@@ -67,7 +67,9 @@ export function readInitialFilters() {
 }
 
 export function getSiteRootPath(pathname = window.location.pathname) {
-  const normalizedPath = pathname.endsWith("/") ? pathname : pathname.replace(/\/index\.html$/, "/");
+  const normalizedPath = pathname.endsWith("/")
+    ? pathname
+    : pathname.replace(/\/index\.html$/, "/");
   const segments = Object.values(PAGE_SEGMENTS).filter(Boolean);
 
   for (const segment of segments) {

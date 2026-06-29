@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   fromCourseStateRows,
+  fromProjectProgressRow,
+  fromProjectSubmissionRow,
   fromStudyPlanRow,
   fromStudyLogRow,
   getCourseStatus,
@@ -8,6 +10,8 @@ import {
   toCourseStateRows,
   toLegacyCourseStateRows,
   toLegacyStudyPlanRow,
+  toProjectProgressRow,
+  toProjectSubmissionRow,
   toStudyPlanRow,
   toStudyLogRow
 } from "./cloudDataMappers";
@@ -154,5 +158,68 @@ describe("cloudDataMappers", () => {
     expect(getCourseStatus({ saved: false, completed: false })).toBe("not_started");
     expect(getCourseStatus({ saved: true, completed: false })).toBe("saved");
     expect(getCourseStatus({ saved: true, completed: true })).toBe("completed");
+  });
+
+  it("maps project progress rows with blockers, next step, and submitted time", () => {
+    const row = toProjectProgressRow("user-1", {
+      blockers: "Need better tests",
+      currentStep: "Building submission form",
+      nextStep: "Add RLS test",
+      projectId: "web-app-with-auth",
+      reflection: "Auth edge cases matter",
+      status: "submitted",
+      submittedAt: "2026-06-29T09:00:00.000Z"
+    });
+
+    expect(row).toMatchObject({
+      blockers: "Need better tests",
+      next_step: "Add RLS test",
+      project_id: "web-app-with-auth",
+      status: "submitted",
+      submitted_at: "2026-06-29T09:00:00.000Z",
+      user_id: "user-1"
+    });
+
+    expect(fromProjectProgressRow(row)).toMatchObject({
+      blockers: "Need better tests",
+      nextStep: "Add RLS test",
+      projectId: "web-app-with-auth",
+      status: "submitted",
+      submittedAt: "2026-06-29T09:00:00.000Z"
+    });
+  });
+
+  it("maps project submissions between local and Supabase shapes", () => {
+    const row = toProjectSubmissionRow("user-1", {
+      createdAt: "2026-06-29T09:00:00.000Z",
+      demoUrl: "https://example.com",
+      description: "A complete product",
+      githubUrl: "https://github.com/example/capstone",
+      id: "1c3b7bd0-2f4e-4a01-9f7a-0f0d4d0d9a90",
+      projectId: "capstone-product",
+      reflection: "Scope control was hard",
+      reviewRequest: "Please review architecture",
+      status: "submitted",
+      title: "Capstone v1",
+      visibility: "public"
+    });
+
+    expect(row).toMatchObject({
+      demo_url: "https://example.com",
+      github_url: "https://github.com/example/capstone",
+      project_id: "capstone-product",
+      review_request: "Please review architecture",
+      user_id: "user-1",
+      visibility: "public"
+    });
+
+    expect(fromProjectSubmissionRow(row)).toMatchObject({
+      demoUrl: "https://example.com",
+      githubUrl: "https://github.com/example/capstone",
+      projectId: "capstone-product",
+      reviewRequest: "Please review architecture",
+      title: "Capstone v1",
+      visibility: "public"
+    });
   });
 });

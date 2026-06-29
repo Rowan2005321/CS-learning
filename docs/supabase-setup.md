@@ -27,6 +27,7 @@ The schema creates:
 - `study_plans`: active plan settings such as weekly hours, target track, and target date
 - `study_plan_items`: ordered courses inside a plan
 - `user_project_progress`: per-user project milestone progress
+- `project_submissions`: per-user project GitHub/demo submissions, reflections, review requests, visibility, status, and reviewer feedback
 - `user_milestone_logs`: reflections and next steps for project milestones
 - `user_track_states`: per-user track status and goals
 - `project_templates`, `project_milestones`, `learning_tracks`: optional public catalog tables
@@ -104,7 +105,9 @@ http://localhost:5173/**
 https://rowan2005321.github.io/CS-learning/**
 ```
 
-When Supabase Auth is configured, `/study-log/` is treated as a personal page. Signed-out visitors are redirected to `/account/?redirectTo=study-log`, and successful email/password or Google sign-in returns them to the study log.
+When Supabase Auth is configured, `/courses/`, `/projects/`, and `/study-log/` are protected product areas. Signed-out visitors are redirected to `/account/?redirectTo=courses`, `/account/?redirectTo=projects`, or `/account/?redirectTo=study-log`, and successful email/password or Google sign-in returns them to the requested page.
+
+If Supabase is not configured, those protected pages show a configuration prompt instead of failing open. Course and project catalog data is still bundled in frontend JavaScript, so this protects the UI flow rather than truly hiding catalog bytes. Move catalog data into Supabase or an API backend if true data hiding becomes a requirement.
 
 ## 5. Configure hosted GitHub Pages
 

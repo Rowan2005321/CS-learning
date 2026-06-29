@@ -15,9 +15,11 @@ describe("getSiteRootPath", () => {
 });
 
 describe("auth redirects", () => {
-  it("treats the personal study log as a protected page", () => {
+  it("treats courses, projects, and the personal study log as protected pages", () => {
     expect(isProtectedPage(PAGE_IDS.studyLog)).toBe(true);
-    expect(isProtectedPage(PAGE_IDS.courses)).toBe(false);
+    expect(isProtectedPage(PAGE_IDS.courses)).toBe(true);
+    expect(isProtectedPage(PAGE_IDS.projects)).toBe(true);
+    expect(isProtectedPage(PAGE_IDS.tracks)).toBe(false);
   });
 
   it("reads only known non-account page ids from redirectTo", () => {
@@ -25,9 +27,9 @@ describe("auth redirects", () => {
       PAGE_IDS.studyLog
     );
 
-    expect(
-      readRedirectPage(PAGE_IDS.courses, "?lang=zh&redirectTo=https://evil.example")
-    ).toBe(PAGE_IDS.courses);
+    expect(readRedirectPage(PAGE_IDS.courses, "?lang=zh&redirectTo=https://evil.example")).toBe(
+      PAGE_IDS.courses
+    );
 
     expect(readRedirectPage(PAGE_IDS.studyLog, "?lang=zh&redirectTo=account")).toBe(
       PAGE_IDS.studyLog
