@@ -102,7 +102,6 @@ export function App({ pageId = PAGE_IDS.home }) {
     completedIds,
     weeklyHours
   });
-  const sources = useMemo(() => [...new Set(courses.map((course) => course.provider))], []);
   const savedSet = useMemo(() => new Set(savedIds), [savedIds]);
   const completedSet = useMemo(() => new Set(completedIds), [completedIds]);
   const normalizedStudyLogState = useMemo(
@@ -487,7 +486,7 @@ export function App({ pageId = PAGE_IDS.home }) {
         ) : null}
 
         {showProjects ? <ProjectMilestones projects={projects} lang={lang} t={t} /> : null}
-        {showSources ? <SourcesSection sources={sources} lang={lang} t={t} /> : null}
+        {showSources ? <SourcesSection courses={courses} lang={lang} t={t} /> : null}
       </main>
       <Footer t={t} />
     </div>
