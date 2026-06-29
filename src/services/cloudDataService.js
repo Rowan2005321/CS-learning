@@ -1,4 +1,18 @@
 import { supabase } from "../lib/supabaseClient";
+import {
+  fromCourseStateRows,
+  fromProjectProgressRow,
+  fromStudyPlanRow,
+  fromStudyLogRow,
+  toCourseStateRows,
+  toLegacyCourseStateRows,
+  toLegacyStudyPlanRow,
+  toLegacyStudyLogRows,
+  toMilestoneLogRow,
+  toProjectProgressRow,
+  toStudyPlanRow,
+  toStudyLogRow
+} from "./cloudDataMappers";
 
 function requireClient() {
   if (!supabase) {
@@ -8,74 +22,50 @@ function requireClient() {
   return supabase;
 }
 
-function toCourseRows(userId, savedIds, completedIds, courseIds = []) {
-  const ids = [...new Set([...courseIds, ...savedIds, ...completedIds])];
-  const savedSet = new Set(savedIds);
-  const completedSet = new Set(completedIds);
-
-  return ids.map((courseId) => ({
-    course_id: courseId,
-    completed: completedSet.has(courseId),
-    saved: savedSet.has(courseId),
-    updated_at: new Date().toISOString(),
-    user_id: userId
-  }));
-}
-
-function toStudyLogRow(userId, entry) {
-  return {
-    id: entry.id,
-    user_id: userId,
-    date: entry.date,
-    hours: entry.hours,
-    topic: entry.topic,
-    note: entry.note,
-    next_step: entry.nextStep,
-    created_at: entry.createdAt,
-    updated_at: new Date().toISOString()
-  };
-}
-
-function fromStudyLogRow(row) {
-  return {
-    id: row.id,
-    date: row.date,
-    hours: Number(row.hours),
-    topic: row.topic,
-    note: row.note ?? "",
-    nextStep: row.next_step ?? "",
-    createdAt: row.created_at
-  };
+function isMissingColumnError(error) {
+  return error?.code === "42703" || /column .* does not exist/i.test(error?.message ?? "");
 }
 
 export async function saveCourseStateToCloud(userId, savedIds, completedIds, courseIds) {
   const client = requireClient();
-  const rows = toCourseRows(userId, savedIds, completedIds, courseIds);
+  const rows = toCourseStateRows(userId, savedIds, completedIds, courseIds);
 
   if (!rows.length) return [];
 
-  const { data, error } = await client
+  const result = await client
     .from("user_course_states")
     .upsert(rows, { onConflict: "user_id,course_id" })
     .select();
 
-  if (error) throw error;
-  return data;
+  if (!result.error) return result.data;
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
+    .from("user_course_states")
+    .upsert(toLegacyCourseStateRows(rows), { onConflict: "user_id,course_id" })
+    .select();
+
+  if (legacy.error) throw legacy.error;
+  return legacy.data;
 }
 
 export async function loadCourseStateFromCloud(userId) {
   const client = requireClient();
-  const { data, error } = await client
+  const result = await client
+    .from("user_course_states")
+    .select("course_id,saved,completed,status,rating,notes")
+    .eq("user_id", userId);
+
+  if (!result.error) return fromCourseStateRows(result.data);
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
     .from("user_course_states")
     .select("course_id,saved,completed")
     .eq("user_id", userId);
 
-  if (error) throw error;
-
-  return {
-    savedIds: data.filter((row) => row.saved).map((row) => row.course_id),
-    completedIds: data.filter((row) => row.completed).map((row) => row.course_id)
-  };
+  if (legacy.error) throw legacy.error;
+  return fromCourseStateRows(legacy.data);
 }
 
 export async function saveStudyLogsToCloud(userId, logs) {
@@ -84,24 +74,125 @@ export async function saveStudyLogsToCloud(userId, logs) {
 
   if (!rows.length) return [];
 
-  const { data, error } = await client
+  const result = await client
     .from("study_logs")
     .upsert(rows, { onConflict: "user_id,id" })
     .select();
 
-  if (error) throw error;
-  return data;
+  if (!result.error) return result.data;
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
+    .from("study_logs")
+    .upsert(toLegacyStudyLogRows(rows), { onConflict: "user_id,id" })
+    .select();
+
+  if (legacy.error) throw legacy.error;
+  return legacy.data;
 }
 
 export async function loadStudyLogsFromCloud(userId) {
   const client = requireClient();
-  const { data, error } = await client
+  const result = await client
+    .from("study_logs")
+    .select("id,date,hours,topic,note,next_step,course_id,tags,created_at")
+    .eq("user_id", userId)
+    .order("date", { ascending: false })
+    .order("created_at", { ascending: false });
+
+  if (!result.error) return result.data.map(fromStudyLogRow);
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
     .from("study_logs")
     .select("id,date,hours,topic,note,next_step,created_at")
     .eq("user_id", userId)
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });
 
+  if (legacy.error) throw legacy.error;
+  return legacy.data.map(fromStudyLogRow);
+}
+
+export async function saveStudyPlanToCloud(userId, plan) {
+  const client = requireClient();
+  const row = toStudyPlanRow(userId, plan);
+  const result = await client
+    .from("study_plans")
+    .upsert(row, { onConflict: "user_id" })
+    .select()
+    .single();
+
+  if (!result.error) return result.data;
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
+    .from("study_plans")
+    .upsert(toLegacyStudyPlanRow(row), { onConflict: "user_id" })
+    .select()
+    .single();
+
+  if (legacy.error) throw legacy.error;
+  return legacy.data;
+}
+
+export async function loadStudyPlanFromCloud(userId) {
+  const client = requireClient();
+  const result = await client
+    .from("study_plans")
+    .select("weekly_hours,active_track,target_track,target_completion_date,title,is_active")
+    .eq("user_id", userId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (!result.error) return fromStudyPlanRow(result.data);
+  if (!isMissingColumnError(result.error)) throw result.error;
+
+  const legacy = await client
+    .from("study_plans")
+    .select("weekly_hours,active_track")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (legacy.error) throw legacy.error;
+  return fromStudyPlanRow(legacy.data);
+}
+
+export async function saveProjectProgressToCloud(userId, progressEntries) {
+  const client = requireClient();
+  const rows = progressEntries.map((entry) => toProjectProgressRow(userId, entry));
+
+  if (!rows.length) return [];
+
+  const { data, error } = await client
+    .from("user_project_progress")
+    .upsert(rows, { onConflict: "user_id,project_id" })
+    .select();
+
   if (error) throw error;
-  return data.map(fromStudyLogRow);
+  return data;
+}
+
+export async function loadProjectProgressFromCloud(userId) {
+  const client = requireClient();
+  const { data, error } = await client
+    .from("user_project_progress")
+    .select("project_id,milestone_id,status,completed,current_step,reflection,started_at,completed_at")
+    .eq("user_id", userId);
+
+  if (error) throw error;
+  return data.map(fromProjectProgressRow);
+}
+
+export async function saveMilestoneLogToCloud(userId, log) {
+  const client = requireClient();
+  const row = toMilestoneLogRow(userId, log);
+  const { data, error } = await client
+    .from("user_milestone_logs")
+    .upsert(row, { onConflict: "user_id,id" })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }

@@ -58,6 +58,23 @@ describe("filterCourses", () => {
     expect(filterCourses(coursesWithUiState, filters).map((course) => course.id)).toEqual(baseline);
   });
 
+  it("does not let Supabase user_course_states fields change filter results", () => {
+    const filters = { ...allFilters, track: "ai-data" };
+    const baseline = filterCourses(courses, filters).map((course) => course.id);
+    const coursesWithCloudState = courses.map((course) => ({
+      ...course,
+      completed: course.id === "cs229",
+      notes: "private user note",
+      rating: 5,
+      saved: true,
+      status: "completed"
+    }));
+
+    expect(filterCourses(coursesWithCloudState, filters).map((course) => course.id)).toEqual(
+      baseline
+    );
+  });
+
   it("filters the new AI agent and Web3 tracks", () => {
     const agentCourses = filterCourses(courses, { ...allFilters, track: "agent-engineering" });
     const web3Courses = filterCourses(courses, { ...allFilters, track: "blockchain-web3" });

@@ -33,11 +33,13 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - 收藏课程和已完成课程保存在本地 localStorage。
 - 根据已完成课程真实计算总体进度。
 - 学习计划面板可根据每周可学习小时数估算完成时间。
-- 学习记录面板可记录每日学习小时数、笔记、产出、下一步计划和连续记录天数，并保存在本地。
-- 可选 Supabase 账号登录与云同步，支持同步收藏课程、已完成课程和学习记录。
+- 个人学习记录面板可记录每日学习小时数、笔记、产出、下一步计划和连续记录天数。
+- 可选 Supabase 账号登录，支持邮箱密码、QQ 邮箱和 Google OAuth；配置后 `/study-log/` 会要求先登录，未登录用户会跳转到 `/account/`。
+- 可选云同步，支持同步收藏课程、已完成课程、学习计划和学习记录。
 - 由 `public/three3.json` 驱动的 Three.js 交互路线地图。
 - 多页面静态架构，包含 `/courses/`、`/tracks/`、`/study-log/`、`/account/`、`/projects/` 和 `/sources/`。
 - 使用 Web Worker 承担课程搜索排序、路线时间估算和进度摘要等规划计算。
+- 面向作品集的项目里程碑，包含交付物、评估清单、推荐课程和 AI 辅助练习建议。
 - 每门课程都有官方直达链接。
 - 支持 GitHub Pages 静态部署。
 
@@ -90,9 +92,9 @@ Open CS Atlas 现在是 Vite 多页面应用，不再只依赖单页 hash 导航
 
 - `/`：首页 Hero 和路线总览。
 - `/courses/`：课程搜索、筛选、路线计划、收藏和完成状态。
-- `/study-log/`：每日学习记录、统计和复盘图表。
-- `/tracks/`：路线图和学科地图。
 - `/account/`：可选 Supabase 登录和云同步。
+- `/study-log/`：个人每日学习记录、统计和复盘图表。配置 Supabase Auth 后，此页面会受登录保护，未登录时跳转到 `/account/?redirectTo=study-log`。
+- `/tracks/`：路线图和学科地图。
 - `/projects/`、`/sources/`：项目里程碑和课程来源说明。
 
 旧链接如 `/#courses`、`/#study-log` 会自动跳转到对应页面，避免已有 GitHub Pages 链接失效。
@@ -103,14 +105,27 @@ Open CS Atlas 现在是 Vite 多页面应用，不再只依赖单页 hash 导航
 
 ## Supabase 云同步
 
-云同步是可选能力。没有配置 Supabase 时，应用仍然可以完整使用本地功能。
+云同步是可选能力。没有配置 Supabase 时，应用仍然可以使用本地功能。配置 Supabase Auth 后，个人学习记录页会变成需要登录的个人区域。
 
 1. 创建 Supabase 项目。
 2. 在 Supabase SQL Editor 中运行 [`supabase/schema.sql`](supabase/schema.sql)。
 3. 复制 `.env.example` 为 `.env.local`。
 4. 设置 `VITE_SUPABASE_URL` 和 `VITE_SUPABASE_PUBLISHABLE_KEY`。
+5. 开启邮箱密码登录，Gmail、QQ 邮箱和其他有效邮箱都可使用。
+6. 如需使用“使用 Google 继续”，在 Supabase Auth 中启用 Google Provider。
 
 完整步骤见 [`docs/supabase-setup.md`](docs/supabase-setup.md)。
+
+当前 schema 已支持长期自学规划数据：
+
+- `profiles` 扩展 Supabase Auth 用户。
+- `user_course_states` 保存收藏、完成、状态、评分和私人笔记。
+- `study_logs` 保存每日学习记录，并支持关联课程和标签。
+- `study_plans`、`study_plan_items` 保存当前学习计划和有序课程安排。
+- `user_project_progress`、`user_milestone_logs` 保存作品集项目进度和阶段复盘。
+- `project_templates`、`project_milestones`、`learning_tracks` 是可选只读内容表。
+
+前端仍然保持 localStorage-first。配置 Supabase 后，`src/services/cloudDataService.js` 会通过 RLS 保护的用户表同步数据；字段转换集中在 `src/services/cloudDataMappers.js`。
 
 ## Three.js 路线地图
 
@@ -159,11 +174,18 @@ Open CS Atlas 现在是 Vite 多页面应用，不再只依赖单页 hash 导航
 
 不要添加低质量广告页、盗版课程、付费内容的非官方搬运、失效链接或来源不清的资源。
 
+## 如何贡献项目里程碑
+
+项目里程碑位于 `src/data/projects.js`。每个里程碑需要包含双语 `title`、`description`、`targetAudience`、`deliverables`、`evaluationChecklist`、`portfolioValue` 和 `aiAssistedTips`，同时补充 `difficulty`、`estimatedWeeks`、`recommendedCourses`、`githubRepoSuggestion` 和 `nextMilestoneId`。
+
+`recommendedCourses` 必须使用 `src/data/courses.js` 中已有的课程 id。新增里程碑时要以作品集产出为核心，交付物要具体到学习者可以发布到 GitHub。
+
 ## Roadmap
 
 - 扩充体系结构、编译器、网络、数据库、分布式系统、AI 工程和安全方向课程。
 - 增加官方链接的定期可用性检查。
 - 增加按每周时间和目标日期生成学习计划的功能。
+- 增加可编辑项目进度，并同步到 `user_project_progress` 和 `user_milestone_logs`。
 - 为中文学习者增加更多前置知识桥接页面。
 - 当课程目录扩大后，补充正式截图和小型文档站。
 

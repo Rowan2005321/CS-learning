@@ -33,11 +33,13 @@ Open CS Atlas 希望帮助你把焦虑变成路线，把路线变成计划，把
 - Saved courses and completed courses stored in localStorage.
 - Real progress calculation from completed courses.
 - Study planner that estimates route duration from weekly available hours.
-- Daily study log for recording study hours, notes, outputs, next steps, and streak progress locally.
-- Optional Supabase account login and cloud sync for saved courses, completed courses, and study logs.
+- Personal study log for recording study hours, notes, outputs, next steps, and streak progress.
+- Optional Supabase account login with email/password, QQ email, and Google OAuth; when configured, `/study-log/` requires sign-in and redirects unauthenticated users to `/account/`.
+- Optional cloud sync for saved courses, completed courses, study plans, and study logs.
 - Interactive Three.js route map driven by `public/three3.json`.
 - Multi-page static architecture for `/courses/`, `/tracks/`, `/study-log/`, `/account/`, `/projects/`, and `/sources/`.
 - Web Worker-backed course planning calculations for search ranking, route estimates, and progress summaries.
+- Portfolio-oriented project milestones with deliverables, evaluation checklists, recommended courses, and AI-assisted practice tips.
 - Official direct link for every course.
 - GitHub Pages-ready static deployment.
 
@@ -90,9 +92,9 @@ Open CS Atlas is built as a Vite multi-page app instead of a hash-only SPA. The 
 
 - `/` for the hero and roadmap overview.
 - `/courses/` for course search, filters, route planning, saved courses, and completion state.
-- `/study-log/` for daily study records and review charts.
-- `/tracks/` for roadmap and discipline exploration.
 - `/account/` for optional Supabase login and cloud sync.
+- `/study-log/` for personal daily study records and review charts. When Supabase Auth is configured, this page is protected and redirects signed-out users to `/account/?redirectTo=study-log`.
+- `/tracks/` for roadmap and discipline exploration.
 - `/projects/` and `/sources/` for project milestones and source transparency.
 
 Legacy hash links such as `/#courses` and `/#study-log` are redirected to the matching page so older GitHub Pages links keep working.
@@ -103,14 +105,27 @@ See [`docs/architecture.md`](docs/architecture.md) for the page, Worker, Supabas
 
 ## Supabase Cloud Sync
 
-Cloud sync is optional. The app still works locally without Supabase.
+Cloud sync is optional. The app still works locally without Supabase. When Supabase Auth is configured, the personal study log page becomes an authenticated area.
 
 1. Create a Supabase project.
 2. Run [`supabase/schema.sql`](supabase/schema.sql) in the Supabase SQL Editor.
 3. Copy `.env.example` to `.env.local`.
 4. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+5. Enable email/password auth for Gmail, QQ email, and other valid email addresses.
+6. Enable the Google provider in Supabase Auth if you want the "Continue with Google" button to work.
 
 See [`docs/supabase-setup.md`](docs/supabase-setup.md) for the full setup guide.
+
+The current schema supports long-term learning planner data:
+
+- `profiles` extends Supabase Auth users.
+- `user_course_states` stores saved, completed, status, rating, and private notes.
+- `study_logs` stores daily logs with optional course links and tags.
+- `study_plans` and `study_plan_items` store active planning data and ordered course plans.
+- `user_project_progress` and `user_milestone_logs` store portfolio milestone progress and reflections.
+- `project_templates`, `project_milestones`, and `learning_tracks` are optional read-only catalog tables.
+
+The frontend remains localStorage-first. When Supabase is configured, `src/services/cloudDataService.js` syncs user-owned rows through RLS-protected tables. Field conversion lives in `src/services/cloudDataMappers.js`.
 
 ## Three.js Route Map
 
@@ -159,11 +174,18 @@ Good course additions usually have:
 
 Do not add low-quality advertising pages, pirated courses, unofficial mirrors of paid content, or expired links.
 
+## Contributing Project Milestones
+
+Project milestones live in `src/data/projects.js`. Each milestone should include bilingual `title`, `description`, `targetAudience`, `deliverables`, `evaluationChecklist`, `portfolioValue`, and `aiAssistedTips`, plus `difficulty`, `estimatedWeeks`, `recommendedCourses`, `githubRepoSuggestion`, and `nextMilestoneId`.
+
+Use course ids from `src/data/courses.js` in `recommendedCourses`, keep each milestone portfolio-oriented, and make the deliverables concrete enough that a learner can publish them on GitHub.
+
 ## Roadmap
 
 - Expand course coverage for architecture, compilers, networking, databases, distributed systems, AI engineering, and security.
 - Add source freshness checks for official links.
 - Add optional learning plans by weekly schedule and target deadline.
+- Add editable project progress and milestone reflection sync backed by `user_project_progress` and `user_milestone_logs`.
 - Add topic pages for Chinese learners who need prerequisite bridges.
 - Add screenshots and a small docs site when the course catalog grows.
 

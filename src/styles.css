@@ -591,6 +591,37 @@ textarea:focus-visible {
   color: var(--teal);
 }
 
+.auth-redirect-note {
+  margin: 0;
+  border: 1px solid rgba(15, 143, 131, 0.18);
+  border-radius: 7px;
+  background: #eef9f7;
+  padding: 10px 12px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.oauth-button {
+  justify-content: center;
+}
+
+.auth-help {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.auth-help svg {
+  flex: 0 0 auto;
+  color: var(--teal);
+}
+
+.auth-guard .auth-card {
+  display: flex;
+  align-items: center;
+}
+
 .auth-form label {
   font-weight: 900;
 }
@@ -601,6 +632,24 @@ textarea:focus-visible {
   border-radius: 7px;
   padding: 11px 12px;
   font: inherit;
+}
+
+.auth-form input:disabled {
+  background: #f4f7f7;
+  color: var(--muted);
+}
+
+.auth-code-step {
+  display: grid;
+  gap: 10px;
+  border: 1px solid rgba(15, 143, 131, 0.2);
+  border-radius: 8px;
+  background: #f1faf8;
+  padding: 12px;
+}
+
+.auth-code-step .button {
+  justify-self: start;
 }
 
 .auth-form small,
@@ -1611,20 +1660,30 @@ button.heatmap-day {
 
 .project-strip {
   display: grid;
-  grid-template-columns: repeat(6, minmax(145px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
 }
 
 .project-card {
-  min-height: 124px;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
-  padding: 14px;
+  padding: 18px;
   text-align: left;
 }
 
-.project-card span {
+.project-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.project-index {
   display: inline-grid;
   place-items: center;
   width: 24px;
@@ -1634,16 +1693,86 @@ button.heatmap-day {
   font-weight: 900;
 }
 
-.project-card strong {
-  display: block;
-  margin: 8px 0 4px;
+.project-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.project-card h3 {
+  margin: 0;
+  font-size: 17px;
 }
 
 .project-card p {
-  margin: 0 0 8px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.project-meta,
+.project-recommendations div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-meta span,
+.project-recommendations code,
+.project-repo code {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--soft);
+  padding: 4px 8px;
   color: var(--muted);
   font-size: 12px;
-  line-height: 1.4;
+  font-weight: 800;
+}
+
+.project-audience,
+.project-detail-block,
+.project-portfolio,
+.project-recommendations,
+.project-repo {
+  display: grid;
+  gap: 7px;
+}
+
+.project-audience strong,
+.project-detail-block span,
+.project-portfolio strong,
+.project-recommendations > span,
+.project-repo > span {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.project-audience span,
+.project-portfolio span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.project-detail-block ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.project-repo code {
+  width: max-content;
+  max-width: 100%;
+  border-radius: 7px;
 }
 
 .project-card.completed svg {
@@ -1745,7 +1874,7 @@ button.heatmap-day {
   }
 
   .project-strip {
-    grid-template-columns: repeat(3, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 
   .sources-section {

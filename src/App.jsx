@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { Grid2X2, List } from "lucide-react";
-import { PAGE_IDS, buildNavLinks, buildPageHref, getLegacyHashTarget, readInitialFilters, readInitialLanguage, writeFiltersToUrl, writeLanguageToUrl } from "./app/navigation";
+import {
+  PAGE_IDS,
+  buildNavLinks,
+  buildPageHref,
+  getLegacyHashTarget,
+  isProtectedPage,
+  readInitialFilters,
+  readInitialLanguage,
+  readRedirectPage,
+  writeFiltersToUrl,
+  writeLanguageToUrl
+} from "./app/navigation";
 import { AuthPanel } from "./components/AuthPanel";
 import { CourseCard } from "./components/CourseCard";
 import { CourseFilters } from "./components/CourseFilters";
@@ -22,8 +33,10 @@ import { useCoursePlannerWorker } from "./hooks/useCoursePlannerWorker";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import {
   loadCourseStateFromCloud,
+  loadStudyPlanFromCloud,
   loadStudyLogsFromCloud,
   saveCourseStateToCloud,
+  saveStudyPlanToCloud,
   saveStudyLogsToCloud
 } from "./services/cloudDataService";
 import {
@@ -58,6 +71,11 @@ function scrollToHashTarget(behavior = "auto") {
   if (!target) return;
 
   target.scrollIntoView({ behavior, block: "start" });
+}
+
+function toAbsoluteHref(href) {
+  if (typeof window === "undefined") return href;
+  return new URL(href, window.location.origin).toString();
 }
 
 export function App({ pageId = PAGE_IDS.home }) {
@@ -101,6 +119,11 @@ export function App({ pageId = PAGE_IDS.home }) {
   const showDisciplineMap = pageId === PAGE_IDS.tracks;
   const showProjects = pageId === PAGE_IDS.projects;
   const showSources = pageId === PAGE_IDS.sources;
+  const accountRedirectPage = showAccount ? readRedirectPage(null) : PAGE_IDS.studyLog;
+  const authSuccessPage = accountRedirectPage ?? PAGE_IDS.studyLog;
+  const authSuccessHref = buildPageHref(authSuccessPage, lang);
+  const authSuccessUrl = toAbsoluteHref(authSuccessHref);
+  const shouldBlockProtectedPage = isProtectedPage(pageId) && auth.isConfigured && !auth.user;
 
   useEffect(() => {
     const queryLang = new URLSearchParams(window.location.search).get("lang");
@@ -139,6 +162,25 @@ export function App({ pageId = PAGE_IDS.home }) {
       writeFiltersToUrl(filters, lang);
     }
   }, [filters, lang, pageId]);
+
+  useEffect(() => {
+    if (!isProtectedPage(pageId) || !auth.isConfigured || auth.isLoading || auth.user) return;
+
+    window.location.replace(
+      buildPageHref(PAGE_IDS.account, lang, {
+        redirectTo: pageId
+      })
+    );
+  }, [auth.isConfigured, auth.isLoading, auth.user, lang, pageId]);
+
+  useEffect(() => {
+    if (pageId !== PAGE_IDS.account || auth.isLoading || !auth.user) return;
+
+    const redirectPage = readRedirectPage(null);
+    if (!redirectPage) return;
+
+    window.location.replace(buildPageHref(redirectPage, lang));
+  }, [auth.isLoading, auth.user, lang, pageId]);
 
   useEffect(() => {
     if (JSON.stringify(studyLogState) !== JSON.stringify(normalizedStudyLogState)) {
@@ -206,6 +248,10 @@ export function App({ pageId = PAGE_IDS.home }) {
     }
   }
 
+  function handleAuthSuccess() {
+    window.location.assign(authSuccessHref);
+  }
+
   function addStudyLog(entry) {
     setStudyLogState((current) => {
       const migrated = migrateStudyLogState(current);
@@ -240,6 +286,7 @@ export function App({ pageId = PAGE_IDS.home }) {
         completedIds,
         courses.map((course) => course.id)
       );
+      await saveStudyPlanToCloud(auth.user.id, { filters, weeklyHours });
       await saveStudyLogsToCloud(auth.user.id, studyLogs);
       setCloudStatus(t.cloudSaved);
     } catch (error) {
@@ -257,10 +304,18 @@ export function App({ pageId = PAGE_IDS.home }) {
 
     try {
       const courseState = await loadCourseStateFromCloud(auth.user.id);
+      const cloudPlan = await loadStudyPlanFromCloud(auth.user.id);
       const cloudLogs = await loadStudyLogsFromCloud(auth.user.id);
 
       setSavedIds(courseState.savedIds);
       setCompletedIds(courseState.completedIds);
+      if (cloudPlan) {
+        setWeeklyHours(cloudPlan.weeklyHours);
+        setFilters((current) => ({
+          ...current,
+          track: cloudPlan.targetTrack || current.track
+        }));
+      }
       importStudyLogs(cloudLogs);
       setCloudStatus(t.cloudLoaded);
     } catch (error) {
@@ -290,7 +345,11 @@ export function App({ pageId = PAGE_IDS.home }) {
             auth={auth}
             cloudStatus={cloudStatus}
             isSyncing={isSyncing}
+            oauthRedirectUrl={authSuccessUrl}
+            redirectLabel={t.studyLog}
+            successHref={authSuccessHref}
             t={t}
+            onAuthSuccess={handleAuthSuccess}
             onLoadCloudData={loadCloudData}
             onSaveLocalData={saveLocalDataToCloud}
           />
@@ -388,7 +447,27 @@ export function App({ pageId = PAGE_IDS.home }) {
           </section>
         ) : null}
 
-        {showStudyLog ? (
+        {showStudyLog && shouldBlockProtectedPage ? (
+          <section className="auth-section auth-guard" id="study-log">
+            <div className="auth-copy">
+              <span>{t.accountEyebrow}</span>
+              <h2>{t.authGuardTitle}</h2>
+              <p>{t.authGuardText}</p>
+            </div>
+            <div className="auth-card">
+              <a
+                className="button primary"
+                href={buildPageHref(PAGE_IDS.account, lang, {
+                  redirectTo: PAGE_IDS.studyLog
+                })}
+              >
+                {t.signIn} / {t.signUp}
+              </a>
+            </div>
+          </section>
+        ) : null}
+
+        {showStudyLog && !shouldBlockProtectedPage ? (
           <StudyLogPanel
             logs={studyLogs}
             lang={lang}

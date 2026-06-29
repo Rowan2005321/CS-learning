@@ -24,6 +24,7 @@ export function useAuth() {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
+      setIsLoading(false);
     });
 
     return () => {
@@ -40,10 +41,63 @@ export function useAuth() {
     return result;
   }
 
-  async function signUpWithEmail(email, password) {
+  async function sendEmailOtp(email, redirectTo) {
     if (!supabase) return { error: new Error("Supabase is not configured.") };
     setAuthError("");
-    const result = await supabase.auth.signUp({ email, password });
+    const result = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: redirectTo,
+        shouldCreateUser: true
+      }
+    });
+    if (result.error) setAuthError(result.error.message);
+    return result;
+  }
+
+  async function verifyEmailOtp(email, token, password) {
+    if (!supabase) return { error: new Error("Supabase is not configured.") };
+    setAuthError("");
+
+    const result = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email"
+    });
+
+    if (result.error) {
+      setAuthError(result.error.message);
+      return result;
+    }
+
+    if (!password) return result;
+
+    const passwordResult = await supabase.auth.updateUser({ password });
+    if (passwordResult.error) {
+      setAuthError(passwordResult.error.message);
+      return passwordResult;
+    }
+
+    return {
+      data: {
+        ...result.data,
+        user: passwordResult.data.user ?? result.data.user
+      },
+      error: null
+    };
+  }
+
+  async function signInWithGoogle(redirectTo) {
+    if (!supabase) return { error: new Error("Supabase is not configured.") };
+    setAuthError("");
+    const result = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo:
+          redirectTo ??
+          (typeof window === "undefined" ? undefined : window.location.href)
+      }
+    });
     if (result.error) setAuthError(result.error.message);
     return result;
   }
@@ -60,10 +114,12 @@ export function useAuth() {
     authError,
     isConfigured: isSupabaseConfigured,
     isLoading,
+    sendEmailOtp,
     session,
     signInWithEmail,
+    signInWithGoogle,
     signOut,
-    signUpWithEmail,
+    verifyEmailOtp,
     user: session?.user ?? null
   };
 }

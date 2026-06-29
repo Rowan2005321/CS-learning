@@ -28,6 +28,16 @@ const LEGACY_HASH_PAGES = {
 };
 
 const FILTER_QUERY_KEYS = ["q", "discipline", "level", "track"];
+const REDIRECT_QUERY_KEY = "redirectTo";
+const PROTECTED_PAGE_IDS = new Set([PAGE_IDS.studyLog]);
+
+export function isKnownPageId(pageId) {
+  return Object.values(PAGE_IDS).includes(pageId);
+}
+
+export function isProtectedPage(pageId) {
+  return PROTECTED_PAGE_IDS.has(pageId);
+}
 
 export function readInitialLanguage() {
   if (typeof window === "undefined") return "zh";
@@ -89,6 +99,22 @@ export function buildPageHref(pageId, lang, extraParams = {}) {
   }
 
   return `${url.pathname}${url.search}`;
+}
+
+export function readRedirectPage(fallbackPageId = PAGE_IDS.studyLog, search) {
+  if (search == null && typeof window === "undefined") return fallbackPageId;
+
+  const redirectPageId = new URLSearchParams(search ?? window.location.search).get(
+    REDIRECT_QUERY_KEY
+  );
+
+  if (!redirectPageId) return fallbackPageId;
+
+  if (isKnownPageId(redirectPageId) && redirectPageId !== PAGE_IDS.account) {
+    return redirectPageId;
+  }
+
+  return fallbackPageId;
 }
 
 export function buildNavLinks(lang) {
