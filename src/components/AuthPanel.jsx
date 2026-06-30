@@ -232,7 +232,7 @@ export function AuthPanel({
       ? t.otpLoginTitle
       : activeTab === AUTH_TABS.passwordLogin
         ? t.passwordLoginTitle
-        : t.signUpWithOtpTitle;
+        : t.signUpWithPasswordTitle;
   const primaryButtonLabel =
     activeTab === AUTH_TABS.signUp
       ? t.signUp

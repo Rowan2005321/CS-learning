@@ -6,14 +6,16 @@ const supabaseKey =
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
 
+export const supabaseAuthOptions = {
+  autoRefreshToken: true,
+  detectSessionInUrl: true,
+  flowType: "implicit",
+  persistSession: true,
+  storageKey: "open-cs-atlas-auth"
+};
+
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        flowType: "pkce",
-        persistSession: true,
-        storageKey: "open-cs-atlas-auth"
-      }
+      auth: supabaseAuthOptions
     })
   : null;

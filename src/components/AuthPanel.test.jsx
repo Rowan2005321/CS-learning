@@ -53,6 +53,9 @@ describe("AuthPanel", () => {
     renderAuthPanel(auth);
 
     await user.click(screen.getByRole("tab", { name: labels.en.authTabSignUp }));
+
+    expect(screen.getByRole("heading", { name: labels.en.signUpWithPasswordTitle })).toBeInTheDocument();
+
     await user.type(screen.getByLabelText(labels.en.email), "NewUser@QQ.COM");
     await user.type(screen.getByLabelText(labels.en.password), "secret123");
     await user.click(screen.getByRole("button", { name: labels.en.signUp }));
