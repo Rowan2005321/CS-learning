@@ -1755,6 +1755,8 @@ button.heatmap-day {
 .sources-section {
   display: grid;
   gap: 28px;
+  min-width: 0;
+  overflow-x: clip;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbfb 100%);
 }
 
@@ -1769,16 +1771,28 @@ button.heatmap-day {
   color: var(--muted);
 }
 
+.sources-section h1,
+.sources-section h2,
+.sources-section h3,
+.source-card-details dd,
+.source-pill-row span,
+.source-card-footer > span,
+.source-transparency-panel p {
+  overflow-wrap: anywhere;
+}
+
 .sources-hero {
   display: grid;
-  grid-template-columns: minmax(320px, 0.85fr) minmax(480px, 1.15fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   gap: 34px;
   align-items: center;
+  min-width: 0;
 }
 
 .sources-copy {
   display: grid;
   gap: 16px;
+  min-width: 0;
   max-width: 680px;
 }
 
@@ -1798,18 +1812,22 @@ button.heatmap-day {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  min-width: 0;
 }
 
 .source-atlas-visual {
   display: grid;
   gap: 10px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .source-atlas-visual .three-atlas,
 .source-atlas-visual .three-atlas-canvas,
 .source-atlas-visual .three-atlas-canvas canvas,
 .source-atlas-fallback {
+  width: 100%;
+  max-width: 100%;
   min-height: 380px;
 }
 
@@ -1831,11 +1849,13 @@ button.heatmap-day {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+  min-width: 0;
 }
 
 .source-stats article {
   display: grid;
   gap: 7px;
+  min-width: 0;
   min-height: 116px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1863,8 +1883,9 @@ button.heatmap-day {
 
 .source-current-lens {
   display: inline-flex;
-  width: max-content;
+  width: fit-content;
   max-width: 100%;
+  min-width: 0;
   align-items: center;
   flex-wrap: wrap;
   gap: 9px;
@@ -1883,8 +1904,9 @@ button.heatmap-day {
 
 .source-quality-grid {
   display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) repeat(4, minmax(170px, 1fr));
+  grid-template-columns: minmax(220px, 0.9fr) repeat(4, minmax(150px, 1fr));
   gap: 14px;
+  min-width: 0;
 }
 
 .source-quality-copy,
@@ -1894,6 +1916,7 @@ button.heatmap-day {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+  min-width: 0;
 }
 
 .source-quality-copy {
@@ -1942,14 +1965,16 @@ button.heatmap-day {
 
 .source-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
   gap: 16px;
+  min-width: 0;
 }
 
 .source-card {
   display: grid;
   gap: 15px;
   align-content: start;
+  min-width: 0;
   padding: 18px;
 }
 
@@ -1958,6 +1983,11 @@ button.heatmap-day {
   justify-content: space-between;
   gap: 12px;
   align-items: start;
+  min-width: 0;
+}
+
+.source-card-header > div {
+  min-width: 0;
 }
 
 .source-card-header h3 {
@@ -1989,12 +2019,14 @@ button.heatmap-day {
 .source-card-details {
   display: grid;
   gap: 12px;
+  min-width: 0;
   margin: 0;
 }
 
 .source-card-details div {
   display: grid;
   gap: 5px;
+  min-width: 0;
 }
 
 .source-card-details dt {
@@ -2013,12 +2045,14 @@ button.heatmap-day {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
 }
 
 .source-pill-row span,
 .source-card-footer > span {
   display: inline-flex;
-  width: max-content;
+  width: auto;
+  min-width: 0;
   max-width: 100%;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -2038,20 +2072,26 @@ button.heatmap-day {
   justify-content: space-between;
   gap: 10px;
   align-items: center;
+  min-width: 0;
+  flex-wrap: wrap;
   border-top: 1px solid var(--line);
   padding-top: 14px;
 }
 
 .source-card-footer .small-button {
   width: auto;
-  min-width: max-content;
+  min-width: 0;
+  max-width: 100%;
+  justify-content: center;
   padding-inline: 12px;
+  text-align: center;
 }
 
 .source-transparency-panel {
   display: grid;
-  grid-template-columns: 32px 1fr;
+  grid-template-columns: 32px minmax(0, 1fr);
   gap: 12px;
+  min-width: 0;
   padding: 18px;
 }
 
