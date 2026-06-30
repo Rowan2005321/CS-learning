@@ -13,10 +13,12 @@ import {
 import { CourseCard } from "./components/CourseCard";
 import { CourseFilters } from "./components/CourseFilters";
 import { CourseTable } from "./components/CourseTable";
+import { Dashboard } from "./components/Dashboard";
 import { DisciplineMap } from "./components/DisciplineMap";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
+import { AuroraBackground, ToastStack } from "./components/ProductSurface";
 import { ProjectMilestones } from "./components/ProjectMilestones";
 import { Roadmap } from "./components/Roadmap";
 import { SourcesSection } from "./components/SourcesSection";
@@ -64,12 +66,37 @@ function createClientId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+const toastCopy = {
+  en: {
+    saved: "Saved locally.",
+    unsaved: "Removed from saved courses.",
+    completed: "Marked as completed.",
+    incomplete: "Marked as not completed.",
+    trackSaved: "Route saved locally.",
+    logSaved: "Study log saved locally.",
+    logsImported: "Study logs imported.",
+    projectUpdated: "Project progress saved locally."
+  },
+  zh: {
+    saved: "已保存到本地收藏。",
+    unsaved: "已从本地收藏移除。",
+    completed: "已标记为完成。",
+    incomplete: "已取消完成标记。",
+    trackSaved: "路线已保存到本地。",
+    logSaved: "学习记录已保存到本地。",
+    logsImported: "学习记录已导入。",
+    projectUpdated: "项目进度已保存到本地。"
+  }
+};
+
 export function App({ pageId = PAGE_IDS.home }) {
   const [lang, setLang] = useLocalStorage("open-cs-atlas-lang", readInitialLanguage());
   const [savedIds, setSavedIds] = useLocalStorage("open-cs-atlas-saved", []);
   const [completedIds, setCompletedIds] = useLocalStorage("open-cs-atlas-completed", []);
+  const [savedTracks, setSavedTracks] = useLocalStorage("open-cs-atlas-saved-tracks", []);
   const [weeklyHours, setWeeklyHours] = useLocalStorage("open-cs-atlas-weekly-hours", 8);
   const [viewMode, setViewMode] = useLocalStorage("open-cs-atlas-view-mode", "table");
+  const [toasts, setToasts] = useState([]);
   const [userProjectProgress, setUserProjectProgress] = useLocalStorage(
     "open-cs-atlas-project-progress",
     []
@@ -87,6 +114,20 @@ export function App({ pageId = PAGE_IDS.home }) {
   const t = labels[lang] ?? labels.zh;
   const navLinks = useMemo(() => buildNavLinks(lang), [lang]);
   const brandHref = useMemo(() => buildPageHref(PAGE_IDS.home, lang), [lang]);
+  const dashboardLinks = useMemo(
+    () => ({
+      courses: buildPageHref(PAGE_IDS.courses, lang, {
+        q: filters.query,
+        discipline: filters.discipline,
+        level: filters.level,
+        track: filters.track
+      }),
+      projects: buildPageHref(PAGE_IDS.projects, lang),
+      studyLog: buildPageHref(PAGE_IDS.studyLog, lang),
+      tracks: buildPageHref(PAGE_IDS.tracks, lang)
+    }),
+    [filters, lang]
+  );
   const { filteredCourses, progress, routeWeeks } = useCoursePlannerWorker({
     courses,
     filters,
@@ -105,6 +146,7 @@ export function App({ pageId = PAGE_IDS.home }) {
   const showRoadmap = pageId === PAGE_IDS.home || pageId === PAGE_IDS.tracks;
   const showCourses = pageId === PAGE_IDS.courses;
   const showStudyLog = pageId === PAGE_IDS.studyLog;
+  const showDashboard = pageId === PAGE_IDS.dashboard;
   const showDisciplineMap = pageId === PAGE_IDS.tracks;
   const showProjects = pageId === PAGE_IDS.projects;
   const showSources = pageId === PAGE_IDS.sources;
@@ -164,6 +206,36 @@ export function App({ pageId = PAGE_IDS.home }) {
     setFilters((current) => ({ ...current, [key]: value }));
   }
 
+  function getToastMessage(key) {
+    return (toastCopy[lang] ?? toastCopy.zh)[key];
+  }
+
+  function showToast(message, tone = "success") {
+    const id = createClientId("toast");
+    setToasts((current) => [...current.slice(-2), { id, message, tone }]);
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((item) => item.id !== id));
+    }, 2600);
+  }
+
+  function saveSelectedTrack(track) {
+    if (!track || track === "all") return;
+
+    setSavedTracks((current) => (current.includes(track) ? current : [...current, track]));
+  }
+
+  function toggleSavedCourse(id) {
+    const isSaved = savedSet.has(id);
+    setSavedIds((current) => toggleId(current, id));
+    showToast(getToastMessage(isSaved ? "unsaved" : "saved"));
+  }
+
+  function toggleCompletedCourse(id) {
+    const isCompleted = completedSet.has(id);
+    setCompletedIds((current) => toggleId(current, id));
+    showToast(getToastMessage(isCompleted ? "incomplete" : "completed"));
+  }
+
   function navigateToCourses(nextFilters = filters) {
     window.location.assign(
       buildPageHref(PAGE_IDS.courses, lang, {
@@ -183,9 +255,11 @@ export function App({ pageId = PAGE_IDS.home }) {
       track
     };
 
+    saveSelectedTrack(track);
     setFilters(nextFilters);
 
     if (pageId === PAGE_IDS.courses) {
+      showToast(getToastMessage("trackSaved"));
       scrollToElement("courses");
     } else {
       navigateToCourses(nextFilters);
@@ -220,6 +294,7 @@ export function App({ pageId = PAGE_IDS.home }) {
       const migrated = migrateStudyLogState(current);
       return createStudyLogState([entry, ...migrated.entries].slice(0, 1000));
     });
+    showToast(getToastMessage("logSaved"));
   }
 
   function deleteStudyLog(id) {
@@ -234,6 +309,7 @@ export function App({ pageId = PAGE_IDS.home }) {
       const migrated = migrateStudyLogState(current);
       return createStudyLogState(mergeStudyLogEntries(migrated.entries, entries).slice(0, 1000));
     });
+    showToast(getToastMessage("logsImported"));
   }
 
   function updateProjectProgress(projectId, updates) {
@@ -270,6 +346,7 @@ export function App({ pageId = PAGE_IDS.home }) {
         ? current.map((entry) => (entry.projectId === projectId ? nextEntry : entry))
         : [...current, nextEntry]
     );
+    showToast(getToastMessage("projectUpdated"));
   }
 
   function startProject(projectId) {
@@ -313,6 +390,7 @@ export function App({ pageId = PAGE_IDS.home }) {
 
   return (
     <div className="app-shell" data-page={pageId}>
+      <AuroraBackground />
       <Header
         activePage={pageId}
         brandHref={brandHref}
@@ -323,7 +401,13 @@ export function App({ pageId = PAGE_IDS.home }) {
       />
       <main>
         {showHero ? (
-          <Hero activeTrack={filters.track} lang={lang} t={t} onSelectTrack={selectTrack} />
+          <Hero
+            activeTrack={filters.track}
+            dashboardHref={buildPageHref(PAGE_IDS.dashboard, lang)}
+            lang={lang}
+            t={t}
+            onSelectTrack={selectTrack}
+          />
         ) : null}
 
         {showRoadmap ? (
@@ -388,8 +472,8 @@ export function App({ pageId = PAGE_IDS.home }) {
                     t={t}
                     savedIds={savedIds}
                     completedIds={completedIds}
-                    onToggleSaved={(id) => setSavedIds((current) => toggleId(current, id))}
-                    onToggleCompleted={(id) => setCompletedIds((current) => toggleId(current, id))}
+                    onToggleSaved={toggleSavedCourse}
+                    onToggleCompleted={toggleCompletedCourse}
                   />
                 ) : (
                   <div className="course-card-grid">
@@ -401,10 +485,8 @@ export function App({ pageId = PAGE_IDS.home }) {
                         t={t}
                         isSaved={savedSet.has(course.id)}
                         isCompleted={completedSet.has(course.id)}
-                        onToggleSaved={(id) => setSavedIds((current) => toggleId(current, id))}
-                        onToggleCompleted={(id) =>
-                          setCompletedIds((current) => toggleId(current, id))
-                        }
+                        onToggleSaved={toggleSavedCourse}
+                        onToggleCompleted={toggleCompletedCourse}
                       />
                     ))}
                   </div>
@@ -424,6 +506,25 @@ export function App({ pageId = PAGE_IDS.home }) {
             onAddLog={addStudyLog}
             onDeleteLog={deleteStudyLog}
             onImportLogs={importStudyLogs}
+          />
+        ) : null}
+
+        {showDashboard ? (
+          <Dashboard
+            completedIds={completedIds}
+            courses={courses}
+            filteredCourses={filteredCourses}
+            lang={lang}
+            links={dashboardLinks}
+            progress={progress}
+            projects={projects}
+            routeWeeks={routeWeeks}
+            savedIds={savedIds}
+            savedTracks={savedTracks}
+            studyLogs={studyLogs}
+            t={t}
+            userProjectProgress={userProjectProgress}
+            weeklyHours={weeklyHours}
           />
         ) : null}
 
@@ -454,6 +555,7 @@ export function App({ pageId = PAGE_IDS.home }) {
         {showSources ? <SourcesSection courses={courses} lang={lang} t={t} /> : null}
       </main>
       <Footer t={t} />
+      <ToastStack items={toasts} />
     </div>
   );
 }

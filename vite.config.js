@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         home: page("index.html"),
         courses: page("courses/index.html"),
+        dashboard: page("dashboard/index.html"),
         projects: page("projects/index.html"),
         sources: page("sources/index.html"),
         studyLog: page("study-log/index.html"),

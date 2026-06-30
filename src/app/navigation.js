@@ -2,6 +2,7 @@ export const PAGE_IDS = {
   home: "home",
   courses: "courses",
   studyLog: "study-log",
+  dashboard: "dashboard",
   tracks: "tracks",
   projects: "projects",
   sources: "sources"
@@ -11,6 +12,7 @@ const PAGE_SEGMENTS = {
   [PAGE_IDS.home]: "",
   [PAGE_IDS.courses]: "courses",
   [PAGE_IDS.studyLog]: "study-log",
+  [PAGE_IDS.dashboard]: "dashboard",
   [PAGE_IDS.tracks]: "tracks",
   [PAGE_IDS.projects]: "projects",
   [PAGE_IDS.sources]: "sources"
@@ -21,6 +23,7 @@ const PAGE_LABELS = {
     [PAGE_IDS.home]: "Roadmap",
     [PAGE_IDS.courses]: "Courses",
     [PAGE_IDS.studyLog]: "Study Log",
+    [PAGE_IDS.dashboard]: "Dashboard",
     [PAGE_IDS.tracks]: "Tracks",
     [PAGE_IDS.projects]: "Projects",
     [PAGE_IDS.sources]: "Sources"
@@ -29,6 +32,7 @@ const PAGE_LABELS = {
     [PAGE_IDS.home]: "路线图",
     [PAGE_IDS.courses]: "课程",
     [PAGE_IDS.studyLog]: "学习记录",
+    [PAGE_IDS.dashboard]: "学习看板",
     [PAGE_IDS.tracks]: "方向",
     [PAGE_IDS.projects]: "项目",
     [PAGE_IDS.sources]: "来源"
@@ -38,6 +42,7 @@ const PAGE_LABELS = {
 const LEGACY_HASH_PAGES = {
   "#courses": PAGE_IDS.courses,
   "#study-log": PAGE_IDS.studyLog,
+  "#dashboard": PAGE_IDS.dashboard,
   "#tracks": PAGE_IDS.tracks,
   "#projects": PAGE_IDS.projects,
   "#sources": PAGE_IDS.sources
@@ -120,6 +125,7 @@ export function buildNavLinks(lang) {
     PAGE_IDS.home,
     PAGE_IDS.courses,
     PAGE_IDS.studyLog,
+    PAGE_IDS.dashboard,
     PAGE_IDS.tracks,
     PAGE_IDS.projects,
     PAGE_IDS.sources

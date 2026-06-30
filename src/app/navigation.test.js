@@ -22,6 +22,7 @@ describe("navigation", () => {
       PAGE_IDS.home,
       PAGE_IDS.courses,
       PAGE_IDS.studyLog,
+      PAGE_IDS.dashboard,
       PAGE_IDS.tracks,
       PAGE_IDS.projects,
       PAGE_IDS.sources
@@ -32,6 +33,7 @@ describe("navigation", () => {
   it("keeps legacy hash links mapped to public pages", () => {
     expect(getLegacyHashTarget("#courses")).toBe(PAGE_IDS.courses);
     expect(getLegacyHashTarget("#study-log")).toBe(PAGE_IDS.studyLog);
+    expect(getLegacyHashTarget("#dashboard")).toBe(PAGE_IDS.dashboard);
     expect(getLegacyHashTarget("#account")).toBeNull();
   });
 });

@@ -16,6 +16,12 @@ CS is not just learning one language or chasing one framework. It is a long-term
 
 Open CS Atlas aims to turn that anxiety into a route, the route into a plan, and the plan into daily action.
 
+## Current Prototype Boundary
+
+Open CS Atlas is currently a frontend-only, local-first prototype deployed on GitHub Pages. It does not include login, registration, account pages, Supabase Auth, a database, cloud sync, payment, or backend administration. Saved courses, completed courses, saved routes, study logs, and project milestone progress are stored in the current browser through `localStorage`.
+
+This keeps the public demo simple, inspectable, and safe while leaving a clean boundary for a future commercial backend.
+
 ## Features
 
 - Chinese and English interface.
@@ -26,8 +32,9 @@ Open CS Atlas aims to turn that anxiety into a route, the route into a plan, and
 - Real progress calculation from completed courses.
 - Study planner that estimates route duration from weekly available hours.
 - Personal study log for recording study hours, notes, outputs, next steps, statistics, and heatmap review.
+- Local dashboard for reviewing saved courses, active route, recent study logs, and project milestone progress without an account.
 - Interactive Three.js route map driven by `public/three3.json`.
-- Multi-page static architecture for `/courses/`, `/tracks/`, `/study-log/`, `/projects/`, and `/sources/`.
+- Multi-page static architecture for `/courses/`, `/tracks/`, `/study-log/`, `/dashboard/`, `/projects/`, and `/sources/`.
 - Web Worker-backed course planning calculations for search ranking, route estimates, and progress summaries.
 - Portfolio-oriented project milestones with deliverables, evaluation checklists, recommended courses, and AI-assisted practice tips.
 - Official direct link for every course.
@@ -82,6 +89,7 @@ Open CS Atlas is a Vite multi-page static React app. The main pages are:
 - `/` for the hero and roadmap overview.
 - `/courses/` for course search, filters, route planning, saved courses, and completion state.
 - `/study-log/` for personal daily study records and review charts.
+- `/dashboard/` for the local learning dashboard.
 - `/tracks/` for roadmap and discipline exploration.
 - `/projects/` for local project milestones, progress records, and portfolio submissions.
 - `/sources/` for source transparency.

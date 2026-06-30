@@ -1,4 +1,12 @@
-import { ArrowRight, BarChart3, Compass, ExternalLink, Map, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  Compass,
+  ExternalLink,
+  LayoutDashboard,
+  Map,
+  Sparkles
+} from "lucide-react";
 import { lazy, Suspense } from "react";
 
 const ThreeAtlasScene = lazy(() =>
@@ -95,7 +103,7 @@ function routeButtonClass(activeTrack, track, variant) {
   return `button ${variant} ${activeTrack === track ? "is-selected" : ""}`.trim();
 }
 
-export function Hero({ activeTrack, lang, t, onSelectTrack }) {
+export function Hero({ activeTrack, dashboardHref, lang, t, onSelectTrack }) {
   return (
     <section className="hero-section" id="roadmap">
       <div className="hero-copy">
@@ -131,6 +139,10 @@ export function Hero({ activeTrack, lang, t, onSelectTrack }) {
             <BarChart3 size={16} aria-hidden="true" />
             {t.softwareRoute}
           </button>
+          <a className="button ghost" href={dashboardHref}>
+            <LayoutDashboard size={16} aria-hidden="true" />
+            {lang === "zh" ? "本地学习看板" : "Local dashboard"}
+          </a>
         </div>
 
         <div className="proof-row">

@@ -21,7 +21,12 @@ const DYNAMIC_UI_SELECTOR = [
   ".source-current-lens",
   ".source-standard-card",
   ".source-card",
-  ".source-transparency-panel"
+  ".source-transparency-panel",
+  ".dashboard-hero-copy > *",
+  ".dashboard-route-card",
+  ".dashboard-metric-card",
+  ".dashboard-panel",
+  ".glass-card"
 ].join(", ");
 
 export function useDynamicUi(pageId) {
