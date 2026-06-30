@@ -1,13 +1,12 @@
 # Architecture
 
-Open CS Atlas is a static Vite multi-page React application.
+Open CS Atlas is a static Vite multi-page React application. It is local-first by design: user progress, saved courses, completed courses, study plans, study logs, and project progress are stored in the browser through `localStorage`.
 
 ## Pages
 
 Each page has its own HTML entry and React mount:
 
 - `index.html` -> `src/main.jsx`
-- `account/index.html` -> `src/pages/account.jsx`
 - `courses/index.html` -> `src/pages/courses.jsx`
 - `study-log/index.html` -> `src/pages/studyLog.jsx`
 - `tracks/index.html` -> `src/pages/tracks.jsx`
@@ -22,7 +21,7 @@ Shared application state and page composition live in `src/App.jsx`.
 
 Legacy hash links such as `/#courses` and `/#study-log` are redirected to real pages.
 
-`/courses/`, `/projects/`, and `/study-log/` are protected product areas when Supabase Auth is configured. Signed-out visitors are redirected to `/account/?redirectTo=courses`, `/account/?redirectTo=projects`, or `/account/?redirectTo=study-log`; successful email/password or Google sign-in returns them to the requested page. If Supabase is not configured, these pages show an account-system configuration prompt instead of failing open.
+All current pages are public static frontend pages backed by bundled assets and browser storage.
 
 ## Worker Boundary
 
@@ -36,25 +35,26 @@ The worker entry is `src/workers/coursePlanner.worker.js`. It delegates to `src/
 
 The hook computes a synchronous fallback first, then replaces it with the Worker result when available.
 
-## Supabase Boundary
+## Local Data Boundary
 
-Supabase remains optional. Static pages work fully with localStorage. When environment variables are present, `src/lib/supabaseClient.js` enables auth and cloud sync through `src/services/cloudDataService.js`.
+Browser-owned data is handled in React state and persisted with `src/hooks/useLocalStorage.js`.
 
-Auth is intentionally client-side and publishable-key only. Email/password supports Gmail, QQ email, and other valid mailbox providers. Google login uses Supabase OAuth and requires the provider and redirect URLs to be configured in the Supabase dashboard.
+Current local data keys include:
 
-The database is split into three groups:
+- `open-cs-atlas-lang`
+- `open-cs-atlas-saved`
+- `open-cs-atlas-completed`
+- `open-cs-atlas-weekly-hours`
+- `open-cs-atlas-view-mode`
+- `open-cs-atlas-study-logs`
+- `open-cs-atlas-project-progress`
+- `open-cs-atlas-project-submissions`
 
-- Local-first user data: `user_course_states`, `study_logs`, `study_plans`, `study_plan_items`, `user_track_states`, `user_project_progress`, `project_submissions`, and `user_milestone_logs`.
-- User identity extension: `profiles`, linked to `auth.users`.
-- Optional public catalog tables: `project_templates`, `project_milestones`, and `learning_tracks`.
+Study log migration and import/export validation live in `src/utils/studyLog.js`.
 
-Course and project catalog data still lives in `src/data/courses.js` and `src/data/projects.js` so additions can remain simple GitHub pull requests. The auth guard protects the UI flow and user operations, but it does not truly hide static catalog data from built JavaScript. True catalog secrecy requires moving catalog queries into Supabase tables or an API backend. The frontend maps Supabase rows through `src/services/cloudDataMappers.js`, which keeps snake_case database fields out of components and preserves compatibility with older deployments that have not run the latest schema yet.
+## Future Backend Boundary
 
-All user-owned tables use RLS policies of the form `(select auth.uid()) = user_id` or `(select auth.uid()) = id`, with indexes on policy and query columns. Public catalog tables have read-only select policies for `anon` and `authenticated`.
-
-## Future Agent Backend
-
-If OpenAI Agents SDK support is added later, keep it out of the static Pages bundle. Add it as a separate service with its own runtime, credentials, tests, and deployment path. The frontend should call that service through explicit API endpoints rather than embedding API keys in Vite.
+If an AI service or external sync layer is added later, keep it out of the static Pages bundle. Add it as a separate service with its own runtime, credentials, tests, migration plan, and deployment path. The frontend should call that service through explicit API endpoints rather than embedding private keys or service credentials in Vite.
 
 ## Project Milestones
 
@@ -65,4 +65,4 @@ Project milestones are stored in `src/data/projects.js` as bilingual, multi-trac
 - `requiredCourses`, `recommendedCourses`, and `unlockCriteria` using ids from `src/data/courses.js`.
 - `reviewQuestions`, `commonPitfalls`, `aiAssistedWorkflow`, `communityCta`, `githubRepoSuggestion`, and `nextProjectIds`.
 
-Do not store `status` in `src/data/projects.js`. Project status is computed by `src/utils/projectStatus.js` from completed courses, completed projects, unlock criteria, and user-owned rows in `user_project_progress`. Project GitHub/demo submissions are stored in `project_submissions`.
+Do not store `status` in `src/data/projects.js`. Project status is computed by `src/utils/projectStatus.js` from completed courses, completed projects, unlock criteria, and local project progress.

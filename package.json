@@ -10,11 +10,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "preview": "vite preview --host 127.0.0.1",
-    "auth:smoke": "node scripts/auth-smoke-check.mjs"
+    "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.108.2",
     "@vitejs/plugin-react": "4.7.0",
     "lucide-react": "0.468.0",
     "react": "19.2.7",

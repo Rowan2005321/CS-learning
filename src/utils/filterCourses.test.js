@@ -58,7 +58,7 @@ describe("filterCourses", () => {
     expect(filterCourses(coursesWithUiState, filters).map((course) => course.id)).toEqual(baseline);
   });
 
-  it("does not let Supabase user_course_states fields change filter results", () => {
+  it("does not let user-owned course state fields change filter results", () => {
     const filters = { ...allFilters, track: "ai-data" };
     const baseline = filterCourses(courses, filters).map((course) => course.id);
     const coursesWithCloudState = courses.map((course) => ({

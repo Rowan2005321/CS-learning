@@ -12,7 +12,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         home: page("index.html"),
-        account: page("account/index.html"),
         courses: page("courses/index.html"),
         projects: page("projects/index.html"),
         sources: page("sources/index.html"),
@@ -22,7 +21,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom"],
-          supabase: ["@supabase/supabase-js"],
           three: ["three"],
           ui: ["lucide-react"]
         }

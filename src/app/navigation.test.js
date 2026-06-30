@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAGE_IDS, getSiteRootPath, isProtectedPage, readAccountRedirectPage, readRedirectPage } from "./navigation";
+import { PAGE_IDS, buildNavLinks, getLegacyHashTarget, getSiteRootPath } from "./navigation";
 
 describe("getSiteRootPath", () => {
   it("returns the GitHub Pages project root from nested multi-page paths", () => {
@@ -14,28 +14,24 @@ describe("getSiteRootPath", () => {
   });
 });
 
-describe("auth redirects", () => {
-  it("treats courses, projects, and the personal study log as protected pages", () => {
-    expect(isProtectedPage(PAGE_IDS.studyLog)).toBe(true);
-    expect(isProtectedPage(PAGE_IDS.courses)).toBe(true);
-    expect(isProtectedPage(PAGE_IDS.projects)).toBe(true);
-    expect(isProtectedPage(PAGE_IDS.tracks)).toBe(false);
+describe("navigation", () => {
+  it("builds public local-first navigation without an account page", () => {
+    const links = buildNavLinks("en");
+
+    expect(links.map((link) => link.pageId)).toEqual([
+      PAGE_IDS.home,
+      PAGE_IDS.courses,
+      PAGE_IDS.studyLog,
+      PAGE_IDS.tracks,
+      PAGE_IDS.projects,
+      PAGE_IDS.sources
+    ]);
+    expect(links.some((link) => link.pageId === "account")).toBe(false);
   });
-  it("defaults account auth success to the personal study log", () => {
-    expect(readAccountRedirectPage("?lang=zh")).toBe(PAGE_IDS.studyLog);
-  });
 
-  it("reads only known non-account page ids from redirectTo", () => {
-    expect(readRedirectPage(PAGE_IDS.courses, "?lang=zh&redirectTo=study-log")).toBe(
-      PAGE_IDS.studyLog
-    );
-
-    expect(readRedirectPage(PAGE_IDS.courses, "?lang=zh&redirectTo=https://evil.example")).toBe(
-      PAGE_IDS.courses
-    );
-
-    expect(readRedirectPage(PAGE_IDS.studyLog, "?lang=zh&redirectTo=account")).toBe(
-      PAGE_IDS.studyLog
-    );
+  it("keeps legacy hash links mapped to public pages", () => {
+    expect(getLegacyHashTarget("#courses")).toBe(PAGE_IDS.courses);
+    expect(getLegacyHashTarget("#study-log")).toBe(PAGE_IDS.studyLog);
+    expect(getLegacyHashTarget("#account")).toBeNull();
   });
 });

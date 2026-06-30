@@ -92,7 +92,6 @@ function getSearchText(project, lang, courseLookup) {
 }
 
 export function ProjectMilestones({
-  auth,
   completedIds = [],
   courses = [],
   lang,
@@ -111,7 +110,6 @@ export function ProjectMilestones({
   const [expandedProjectId, setExpandedProjectId] = useState(null);
   const [progressDrafts, setProgressDrafts] = useState({});
   const [submissionDrafts, setSubmissionDrafts] = useState({});
-  const isSignedIn = Boolean(auth?.user);
   const courseLookup = useMemo(
     () => new Map(courses.map((course) => [course.id, course])),
     [courses]
@@ -131,11 +129,11 @@ export function ProjectMilestones({
     return projects
       .filter((project) => activeTrack === "all" || project.trackIds.includes(activeTrack))
       .filter((project) => {
-        if (!normalizedQuery || !isSignedIn) return true;
+        if (!normalizedQuery) return true;
         return getSearchText(project, lang, courseLookup).includes(normalizedQuery);
       })
       .sort((left, right) => left.order - right.order);
-  }, [activeTrack, courseLookup, isSignedIn, lang, projects, query]);
+  }, [activeTrack, courseLookup, lang, projects, query]);
 
   function courseTitle(courseId) {
     const course = courseLookup.get(courseId);
@@ -291,22 +289,15 @@ export function ProjectMilestones({
             id="project-search-input"
             type="search"
             value={query}
-            disabled={!isSignedIn}
-            placeholder={
-              isSignedIn
-                ? text(t, "projectSearchPlaceholder", "Search project title, deliverables, tags...")
-                : text(t, "loginToSearchProjects", "Sign in to search projects")
-            }
+            placeholder={text(
+              t,
+              "projectSearchPlaceholder",
+              "Search project title, deliverables, tags..."
+            )}
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
       </div>
-
-      {!isSignedIn ? (
-        <p className="project-auth-note">
-          {text(t, "loginToSearchProjects", "Sign in to search projects")}
-        </p>
-      ) : null}
 
       <div className="project-strip">
         {visibleProjects.map((project) => {
@@ -396,7 +387,6 @@ export function ProjectMilestones({
                   <button
                     className="button primary"
                     type="button"
-                    disabled={!isSignedIn}
                     onClick={() => onStartProject?.(project.id)}
                   >
                     <Play size={15} aria-hidden="true" />

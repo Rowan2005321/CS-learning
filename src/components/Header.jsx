@@ -22,15 +22,15 @@ export function Header({ activePage, brandHref, lang, navLinks, onLanguageChange
       </button>
 
       <nav className={isOpen ? "is-open" : ""} aria-label="Primary navigation">
-        {t.nav.map((item, index) => (
+        {navLinks.map((link) => (
           <a
-            key={item}
-            className={navLinks[index]?.pageId === activePage ? "is-active" : ""}
-            aria-current={navLinks[index]?.pageId === activePage ? "page" : undefined}
-            href={navLinks[index]?.href ?? "#"}
+            key={link.pageId}
+            className={link.pageId === activePage ? "is-active" : ""}
+            aria-current={link.pageId === activePage ? "page" : undefined}
+            href={link.href}
             onClick={() => setIsOpen(false)}
           >
-            {item}
+            {link.label}
           </a>
         ))}
       </nav>

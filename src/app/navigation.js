@@ -1,6 +1,5 @@
 export const PAGE_IDS = {
   home: "home",
-  account: "account",
   courses: "courses",
   studyLog: "study-log",
   tracks: "tracks",
@@ -10,7 +9,6 @@ export const PAGE_IDS = {
 
 const PAGE_SEGMENTS = {
   [PAGE_IDS.home]: "",
-  [PAGE_IDS.account]: "account",
   [PAGE_IDS.courses]: "courses",
   [PAGE_IDS.studyLog]: "study-log",
   [PAGE_IDS.tracks]: "tracks",
@@ -18,8 +16,26 @@ const PAGE_SEGMENTS = {
   [PAGE_IDS.sources]: "sources"
 };
 
+const PAGE_LABELS = {
+  en: {
+    [PAGE_IDS.home]: "Roadmap",
+    [PAGE_IDS.courses]: "Courses",
+    [PAGE_IDS.studyLog]: "Study Log",
+    [PAGE_IDS.tracks]: "Tracks",
+    [PAGE_IDS.projects]: "Projects",
+    [PAGE_IDS.sources]: "Sources"
+  },
+  zh: {
+    [PAGE_IDS.home]: "路线图",
+    [PAGE_IDS.courses]: "课程",
+    [PAGE_IDS.studyLog]: "学习记录",
+    [PAGE_IDS.tracks]: "方向",
+    [PAGE_IDS.projects]: "项目",
+    [PAGE_IDS.sources]: "来源"
+  }
+};
+
 const LEGACY_HASH_PAGES = {
-  "#account": PAGE_IDS.account,
   "#courses": PAGE_IDS.courses,
   "#study-log": PAGE_IDS.studyLog,
   "#tracks": PAGE_IDS.tracks,
@@ -28,15 +44,9 @@ const LEGACY_HASH_PAGES = {
 };
 
 const FILTER_QUERY_KEYS = ["q", "discipline", "level", "track"];
-const REDIRECT_QUERY_KEY = "redirectTo";
-export const PROTECTED_PAGE_IDS = new Set([PAGE_IDS.courses, PAGE_IDS.studyLog, PAGE_IDS.projects]);
 
 export function isKnownPageId(pageId) {
   return Object.values(PAGE_IDS).includes(pageId);
-}
-
-export function isProtectedPage(pageId) {
-  return PROTECTED_PAGE_IDS.has(pageId);
 }
 
 export function readInitialLanguage() {
@@ -103,36 +113,21 @@ export function buildPageHref(pageId, lang, extraParams = {}) {
   return `${url.pathname}${url.search}`;
 }
 
-export function readRedirectPage(fallbackPageId = PAGE_IDS.studyLog, search) {
-  if (search == null && typeof window === "undefined") return fallbackPageId;
-
-  const redirectPageId = new URLSearchParams(search ?? window.location.search).get(
-    REDIRECT_QUERY_KEY
-  );
-
-  if (!redirectPageId) return fallbackPageId;
-
-  if (isKnownPageId(redirectPageId) && redirectPageId !== PAGE_IDS.account) {
-    return redirectPageId;
-  }
-
-  return fallbackPageId;
-}
-
-export function readAccountRedirectPage(search) {
-  return readRedirectPage(PAGE_IDS.studyLog, search);
-}
-
 export function buildNavLinks(lang) {
+  const labels = PAGE_LABELS[lang] ?? PAGE_LABELS.zh;
+
   return [
-    { pageId: PAGE_IDS.home, href: buildPageHref(PAGE_IDS.home, lang) },
-    { pageId: PAGE_IDS.account, href: buildPageHref(PAGE_IDS.account, lang) },
-    { pageId: PAGE_IDS.courses, href: buildPageHref(PAGE_IDS.courses, lang) },
-    { pageId: PAGE_IDS.studyLog, href: buildPageHref(PAGE_IDS.studyLog, lang) },
-    { pageId: PAGE_IDS.tracks, href: buildPageHref(PAGE_IDS.tracks, lang) },
-    { pageId: PAGE_IDS.projects, href: buildPageHref(PAGE_IDS.projects, lang) },
-    { pageId: PAGE_IDS.sources, href: buildPageHref(PAGE_IDS.sources, lang) }
-  ];
+    PAGE_IDS.home,
+    PAGE_IDS.courses,
+    PAGE_IDS.studyLog,
+    PAGE_IDS.tracks,
+    PAGE_IDS.projects,
+    PAGE_IDS.sources
+  ].map((pageId) => ({
+    href: buildPageHref(pageId, lang),
+    label: labels[pageId],
+    pageId
+  }));
 }
 
 export function writeLanguageToUrl(nextLang) {

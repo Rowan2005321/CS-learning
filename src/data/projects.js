@@ -17,8 +17,8 @@ export const projectTracks = [
       zh: "软件工程 / 全栈项目线"
     },
     description: {
-      en: "Move from course exercises into real web apps, testing, deployment, and backend data.",
-      zh: "适合想从课程学习走向真实 Web 应用和工程实践的学习者。"
+      en: "Move from course exercises into static web apps, testing, deployment, and local data design.",
+      zh: "适合想从课程学习走向静态 Web 应用和前端工程实践的学习者。"
     }
   },
   {
@@ -261,24 +261,24 @@ export const projects = [
       zh: "把抽象算法变成可观察、可展示的项目。"
     },
     githubRepoSuggestion: "data-structures-visualizer",
-    nextProjectIds: ["web-app-with-auth", "interview-prep-portfolio"],
+    nextProjectIds: ["web-app-with-local-state", "interview-prep-portfolio"],
     tags: ["data-structures", "algorithms", "visualization"]
   }),
   makeProject({
-    id: "web-app-with-auth",
+    id: "web-app-with-local-state",
     trackIds: ["software-engineering", "portfolio-capstone"],
     order: 4,
     title: {
-      en: "Web App with Auth",
-      zh: "带登录认证的 Web 应用"
+      en: "Web App with Local State",
+      zh: "本地状态 Web 应用"
     },
     subtitle: {
-      en: "Build a real user-facing app with protected state.",
-      zh: "做一个包含受保护用户状态的真实 Web 应用。"
+      en: "Build a real user-facing app with routing, forms, and persistent browser state.",
+      zh: "做一个包含路由、表单和浏览器本地持久化状态的真实 Web 应用。"
     },
     description: {
-      en: "Create a web app with routing, forms, authentication, protected user state, and deployment.",
-      zh: "做一个带登录、路由、表单校验、用户状态和部署的 Web 应用。"
+      en: "Create a static web app with routing, forms, localStorage state, import/export, and deployment.",
+      zh: "做一个带路由、表单校验、localStorage 状态、导入导出和部署的静态 Web 应用。"
     },
     targetAudience: {
       en: "Learners moving from scripts to user-facing software.",
@@ -295,36 +295,36 @@ export const projects = [
       minCompletedCourses: 2
     },
     deliverables: {
-      en: ["Responsive app", "Auth flow", "Form validation", "Deployment URL"],
-      zh: ["响应式应用", "认证流程", "表单校验", "部署链接"]
+      en: ["Responsive app", "Local state persistence", "Form validation", "Deployment URL"],
+      zh: ["响应式应用", "本地状态持久化", "表单校验", "部署链接"]
     },
     portfolioValue: {
       en: "Shows product thinking beyond isolated programming exercises.",
       zh: "体现超越单点编程练习的产品实现能力。"
     },
-    githubRepoSuggestion: "auth-web-app",
-    nextProjectIds: ["database-backed-learning-tracker", "testing-and-deployment-pipeline"],
-    tags: ["react", "auth", "forms", "deployment"]
+    githubRepoSuggestion: "local-state-web-app",
+    nextProjectIds: ["localstorage-learning-tracker", "testing-and-deployment-pipeline"],
+    tags: ["react", "local-storage", "forms", "deployment"]
   }),
   makeProject({
-    id: "database-backed-learning-tracker",
+    id: "localstorage-learning-tracker",
     trackIds: ["software-engineering", "portfolio-capstone"],
     order: 5,
     title: {
-      en: "Database-backed Learning Tracker",
-      zh: "数据库驱动的学习跟踪器"
+      en: "LocalStorage Learning Tracker",
+      zh: "本地学习跟踪器"
     },
     subtitle: {
-      en: "Persist personal learning data with schema, RLS, and sync.",
-      zh: "用 schema、RLS 和同步逻辑持久化学习数据。"
+      en: "Persist personal learning data in the browser with versioned local state.",
+      zh: "用版本化本地状态在浏览器里持久化学习数据。"
     },
     description: {
-      en: "Design database tables, RLS, indexes, and cloud sync logic for a long-term learning tracker.",
-      zh: "设计数据库、RLS、索引和云端同步逻辑，做一个长期学习记录工具。"
+      en: "Design a local-first learning tracker with localStorage migration, JSON import/export, CSV export, and review charts.",
+      zh: "设计一个本地优先的学习记录工具，包含 localStorage 迁移、JSON 导入导出、CSV 导出和复盘图表。"
     },
     targetAudience: {
-      en: "Learners ready to connect frontend state with durable backend data.",
-      zh: "适合准备把前端状态连接到持久化后端数据的学习者。"
+      en: "Learners ready to turn frontend state into a durable browser-based tool.",
+      zh: "适合准备把前端状态整理成可长期使用的浏览器工具的学习者。"
     },
     difficulty: "intermediate",
     estimatedWeeks: 3,
@@ -333,19 +333,19 @@ export const projects = [
     recommendedCourses: ["cmu-ai-tools-software-dev"],
     unlockCriteria: {
       requiredCourses: ["cmu-db", "fullstackopen"],
-      requiredProjects: ["web-app-with-auth"]
+      requiredProjects: ["web-app-with-local-state"]
     },
     deliverables: {
-      en: ["Schema migration", "RLS policies", "Sync service", "Mapper tests"],
-      zh: ["Schema 迁移", "RLS 策略", "同步服务", "数据映射测试"]
+      en: ["Versioned localStorage state", "JSON import/export", "CSV export", "Utility tests"],
+      zh: ["版本化 localStorage 状态", "JSON 导入导出", "CSV 导出", "工具函数测试"]
     },
     portfolioValue: {
-      en: "Demonstrates backend data modeling and security awareness.",
-      zh: "展示后端数据建模和安全意识。"
+      en: "Demonstrates local-first product thinking, data migration awareness, and practical frontend engineering.",
+      zh: "展示本地优先产品思维、数据迁移意识和实用前端工程能力。"
     },
-    githubRepoSuggestion: "database-learning-tracker",
+    githubRepoSuggestion: "localstorage-learning-tracker",
     nextProjectIds: ["testing-and-deployment-pipeline", "capstone-product"],
-    tags: ["database", "rls", "supabase", "sync"]
+    tags: ["local-storage", "local-first", "import-export", "data-modeling"]
   }),
   makeProject({
     id: "testing-and-deployment-pipeline",
@@ -374,7 +374,7 @@ export const projects = [
     recommendedCourses: ["cmu-ai-tools-software-dev", "aider-docs"],
     unlockCriteria: {
       requiredCourses: ["fullstackopen"],
-      requiredProjects: ["web-app-with-auth"]
+      requiredProjects: ["web-app-with-local-state"]
     },
     deliverables: {
       en: ["Unit tests", "Lint config", "CI workflow", "Deployment docs"],
@@ -539,7 +539,7 @@ export const projects = [
     recommendedCourses: ["fullstackdeeplearning-llm-bootcamp", "ragas-rag-evaluation"],
     unlockCriteria: {
       requiredCourses: ["deeplearning-ai-building-evaluating-advanced-rag"],
-      requiredProjects: ["web-app-with-auth"],
+      requiredProjects: ["web-app-with-local-state"],
       minCompletedCourses: 3
     },
     deliverables: {
@@ -944,12 +944,12 @@ export const projects = [
       zh: "综合毕业产品"
     },
     subtitle: {
-      en: "Build one complete product with requirements, architecture, data, frontend, backend, tests, deployment, and retrospective.",
-      zh: "完成一个包含需求、架构、数据库、前端、后端、测试、部署和复盘的完整产品。"
+      en: "Build one complete static product with requirements, architecture, data model, frontend, tests, deployment, and retrospective.",
+      zh: "完成一个包含需求、架构、数据模型、前端、测试、部署和复盘的完整静态产品。"
     },
     description: {
-      en: "Build a complete product with requirements, architecture, database, frontend, backend, tests, deployment, and retrospective.",
-      zh: "做一个完整产品，包含需求、架构、数据库、前端、后端、测试、部署和复盘。"
+      en: "Build a complete static product with requirements, architecture, local data model, frontend, tests, deployment, and retrospective.",
+      zh: "做一个完整静态产品，包含需求、架构、本地数据模型、前端、测试、部署和复盘。"
     },
     targetAudience: {
       en: "Learners ready to synthesize the full CS self-study path.",
@@ -962,7 +962,7 @@ export const projects = [
     recommendedCourses: ["cs229", "ostep", "cmu-ai-tools-software-dev", "openai-evals"],
     unlockCriteria: {
       requiredCourses: ["fullstackopen", "cmu-db"],
-      requiredProjects: ["database-backed-learning-tracker", "testing-and-deployment-pipeline"],
+      requiredProjects: ["localstorage-learning-tracker", "testing-and-deployment-pipeline"],
       minCompletedProjects: 4
     },
     deliverables: {
