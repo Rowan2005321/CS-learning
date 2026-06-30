@@ -195,6 +195,7 @@ export function ThreeAtlasScene({ lang = "zh", activeTrack = "all", onSelectTrac
 
     const raycaster = new Raycaster();
     const pointer = new Vector2(-10, -10);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let hoveredNodeId = null;
     let frameId = 0;
 
@@ -231,7 +232,8 @@ export function ThreeAtlasScene({ lang = "zh", activeTrack = "all", onSelectTrac
 
     function animate() {
       frameId = window.requestAnimationFrame(animate);
-      root.rotation.y += sceneData.motion?.rotationSpeed ?? 0.0016;
+      const shouldReduceMotion = reduceMotion.matches;
+      root.rotation.y += shouldReduceMotion ? 0 : (sceneData.motion?.rotationSpeed ?? 0.0016);
 
       raycaster.setFromCamera(pointer, camera);
       const intersections = raycaster.intersectObjects(nodeMeshes, true);
@@ -240,7 +242,9 @@ export function ThreeAtlasScene({ lang = "zh", activeTrack = "all", onSelectTrac
       for (const group of nodeMeshes) {
         const currentTrack = activeTrackRef.current;
         const isActiveTrack = currentTrack !== "all" && group.userData.node.track === currentTrack;
-        const pulse = 1 + Math.sin(Date.now() * 0.003 + group.position.x) * (sceneData.motion?.nodePulse ?? 0.08);
+        const pulse = shouldReduceMotion
+          ? 1
+          : 1 + Math.sin(Date.now() * 0.003 + group.position.x) * (sceneData.motion?.nodePulse ?? 0.08);
         group.scale.setScalar(isActiveTrack ? 1.16 * pulse : 1);
       }
 

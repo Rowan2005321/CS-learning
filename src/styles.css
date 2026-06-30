@@ -11,6 +11,9 @@
   --green: #78a843;
   --danger: #c2410c;
   --shadow: 0 22px 55px rgba(15, 32, 51, 0.12);
+  --motion-fast: 160ms ease;
+  --motion-medium: 260ms ease;
+  --motion-slow: 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
   color: var(--ink);
   background: #ffffff;
   font-family:
@@ -78,6 +81,48 @@ textarea:focus-visible {
   border: 0;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .dynamic-ui .motion-item {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity var(--motion-slow),
+      transform var(--motion-slow),
+      border-color var(--motion-medium),
+      box-shadow var(--motion-medium),
+      background-color var(--motion-medium),
+      color var(--motion-medium);
+  }
+
+  .dynamic-ui .motion-item:not(.motion-visible) {
+    transition-delay: calc(var(--motion-index, 0) * 42ms);
+  }
+
+  .dynamic-ui .motion-item.motion-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .dynamic-ui .project-card.locked.motion-visible {
+    opacity: 0.72;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
 .app-shell {
   min-height: 100vh;
 }
@@ -114,6 +159,9 @@ textarea:focus-visible {
   min-width: 0;
   font-size: 20px;
   font-weight: 800;
+  transition:
+    color var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .brand svg {
@@ -137,6 +185,12 @@ textarea:focus-visible {
   color: var(--teal);
   border-bottom: 3px solid var(--teal);
   padding-bottom: 20px;
+}
+
+.site-header nav a {
+  transition:
+    color var(--motion-fast),
+    border-color var(--motion-fast);
 }
 
 .lang-switch,
@@ -166,6 +220,10 @@ textarea:focus-visible {
   color: var(--muted);
   font-size: 13px;
   font-weight: 800;
+  transition:
+    background-color var(--motion-fast),
+    color var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .lang-option.is-active {
@@ -232,6 +290,12 @@ textarea:focus-visible {
   border-radius: 7px;
   padding: 11px 16px;
   font-weight: 800;
+  transition:
+    background-color var(--motion-medium),
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    color var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .button.primary {
@@ -296,6 +360,7 @@ textarea:focus-visible {
 
 .three-atlas {
   position: relative;
+  isolation: isolate;
   width: 100%;
   min-height: 410px;
   border: 1px solid rgba(115, 151, 153, 0.34);
@@ -305,9 +370,32 @@ textarea:focus-visible {
     radial-gradient(circle at 72% 22%, rgba(15, 143, 131, 0.16), transparent 34%);
   box-shadow: 0 24px 54px rgba(15, 32, 51, 0.13);
   overflow: hidden;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
+}
+
+.three-atlas::before {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(100deg, transparent 0%, rgba(15, 143, 131, 0.12) 48%, transparent 72%);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-68%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dynamic-ui .three-atlas.motion-visible::before {
+    animation: atlasSweep 6s ease-in-out 900ms infinite;
+  }
 }
 
 .three-atlas-canvas {
+  position: relative;
+  z-index: 0;
   width: 100%;
   min-height: 410px;
 }
@@ -321,6 +409,7 @@ textarea:focus-visible {
 
 .three-atlas-panel {
   position: absolute;
+  z-index: 2;
   left: 18px;
   bottom: 18px;
   max-width: min(360px, calc(100% - 36px));
@@ -347,6 +436,7 @@ textarea:focus-visible {
 
 .three-atlas-controls {
   position: absolute;
+  z-index: 2;
   top: 16px;
   left: 16px;
   right: 16px;
@@ -365,6 +455,12 @@ textarea:focus-visible {
   font-size: 12px;
   font-weight: 800;
   backdrop-filter: blur(10px);
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    color var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .three-atlas-controls button.is-active,
@@ -374,10 +470,21 @@ textarea:focus-visible {
   color: #ffffff;
 }
 
+.three-atlas-controls button.is-active {
+  box-shadow: 0 0 0 4px rgba(15, 143, 131, 0.14);
+}
+
 .atlas-map {
   width: 100%;
   min-height: 390px;
   display: block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .atlas-map .route {
+    stroke-dasharray: 10 12;
+    animation: routeDash 16s linear infinite;
+  }
 }
 
 .paper {
@@ -542,6 +649,7 @@ textarea:focus-visible {
 .progress-track div {
   height: 100%;
   background: var(--teal);
+  transition: width 620ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .small-button {
@@ -553,6 +661,12 @@ textarea:focus-visible {
   padding: 10px;
   background: #ffffff;
   font-weight: 800;
+  transition:
+    background-color var(--motion-medium),
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    color var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .route-summary {
@@ -579,6 +693,11 @@ textarea:focus-visible {
   background: transparent;
   color: var(--ink);
   text-align: center;
+  transition:
+    background-color var(--motion-medium),
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .roadmap-node span {
@@ -591,6 +710,9 @@ textarea:focus-visible {
   color: #ffffff;
   background: var(--teal);
   font-weight: 900;
+  transition:
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .roadmap-node svg {
@@ -616,6 +738,7 @@ textarea:focus-visible {
 .roadmap-node.is-active {
   border-color: rgba(15, 143, 131, 0.25);
   background: #f1faf9;
+  box-shadow: 0 10px 26px rgba(15, 143, 131, 0.1);
 }
 
 .courses-section {
@@ -681,6 +804,10 @@ textarea:focus-visible {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .planner-title {
@@ -823,6 +950,12 @@ textarea:focus-visible {
   border-radius: 7px;
   background: #ffffff;
   color: var(--ink);
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    color var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .icon-button.labeled {
@@ -946,6 +1079,10 @@ textarea:focus-visible {
   border-radius: 8px;
   padding: 16px;
   background: #ffffff;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .course-card.is-completed {
@@ -1086,6 +1223,10 @@ textarea:focus-visible {
   border-radius: 8px;
   padding: 12px;
   background: #ffffff;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .study-log-stats svg {
@@ -1122,6 +1263,10 @@ textarea:focus-visible {
   border-radius: 8px;
   padding: 16px;
   background: #ffffff;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .study-log-review-grid h3 {
@@ -1219,6 +1364,11 @@ textarea:focus-visible {
   border-radius: 5px;
   background: #edf1f4;
   padding: 0;
+  transition:
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    opacity var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 button.heatmap-day {
@@ -1227,7 +1377,10 @@ button.heatmap-day {
 
 .heatmap-day.is-active {
   border-color: var(--ink);
-  box-shadow: 0 0 0 2px rgba(15, 32, 51, 0.12);
+  box-shadow:
+    0 0 0 2px rgba(15, 32, 51, 0.12),
+    0 7px 18px rgba(15, 32, 51, 0.12);
+  transform: translateY(-1px);
 }
 
 .heatmap-day.is-future {
@@ -1310,6 +1463,10 @@ button.heatmap-day {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .study-log-form {
@@ -1462,6 +1619,12 @@ button.heatmap-day {
   border-radius: 7px;
   background: #ffffff;
   color: var(--teal);
+  transition:
+    background-color var(--motion-medium),
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    color var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .discipline-tile.is-active {
@@ -1492,6 +1655,12 @@ button.heatmap-day {
   color: var(--muted);
   font-size: 13px;
   font-weight: 850;
+  transition:
+    background-color var(--motion-fast),
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    color var(--motion-fast),
+    transform var(--motion-fast);
 }
 
 .project-track-tabs button.is-active {
@@ -1536,6 +1705,11 @@ button.heatmap-day {
   background: #ffffff;
   padding: 18px;
   text-align: left;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    opacity var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .project-card-header,
@@ -1861,6 +2035,10 @@ button.heatmap-day {
   border-radius: 8px;
   background: #ffffff;
   padding: 16px;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .source-stats svg,
@@ -1896,6 +2074,10 @@ button.heatmap-day {
   color: var(--muted);
   font-size: 13px;
   font-weight: 850;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .source-current-lens strong {
@@ -1944,6 +2126,10 @@ button.heatmap-day {
   align-content: start;
   min-height: 190px;
   padding: 16px;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .source-standard-card h3 {
@@ -1976,6 +2162,10 @@ button.heatmap-day {
   align-content: start;
   min-width: 0;
   padding: 18px;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .source-card-header {
@@ -2093,6 +2283,10 @@ button.heatmap-day {
   gap: 12px;
   min-width: 0;
   padding: 18px;
+  transition:
+    border-color var(--motion-medium),
+    box-shadow var(--motion-medium),
+    transform var(--motion-medium);
 }
 
 .source-transparency-panel h3 {
@@ -2101,6 +2295,95 @@ button.heatmap-day {
 
 .source-transparency-panel p + p {
   margin-top: 6px;
+}
+
+@media (hover: hover) {
+  .brand:hover,
+  .button:hover,
+  .small-button:hover,
+  .icon-button:hover,
+  .lang-option:hover,
+  .three-atlas-controls button:hover,
+  .project-track-tabs button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:hover,
+  .small-button:hover,
+  .icon-button:hover,
+  .three-atlas-controls button:hover,
+  .project-track-tabs button:hover {
+    border-color: rgba(15, 143, 131, 0.36);
+    box-shadow: 0 10px 24px rgba(15, 32, 51, 0.1);
+  }
+
+  .roadmap-node:hover,
+  .planner-panel:hover,
+  .course-card:hover,
+  .study-log-stats div:hover,
+  .study-log-review-grid article:hover,
+  .study-log-heatmap:hover,
+  .study-log-form:hover,
+  .study-log-list:hover,
+  .discipline-tile:hover,
+  .project-card:not(.locked):hover,
+  .source-stats article:hover,
+  .source-current-lens:hover,
+  .source-standard-card:hover,
+  .source-card:hover,
+  .source-transparency-panel:hover {
+    border-color: rgba(15, 143, 131, 0.32);
+    box-shadow: 0 14px 34px rgba(15, 32, 51, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .roadmap-node:hover span {
+    box-shadow: 0 0 0 5px rgba(15, 143, 131, 0.13);
+    transform: translateY(-1px);
+  }
+
+  button.heatmap-day:hover {
+    border-color: rgba(15, 143, 131, 0.45);
+    box-shadow: 0 0 0 2px rgba(15, 143, 131, 0.14);
+    transform: translateY(-1px);
+  }
+}
+
+.roadmap-node:focus-visible,
+.planner-panel:focus-within,
+.course-card:focus-within,
+.study-log-form:focus-within,
+.study-log-list:focus-within,
+.discipline-tile:focus-visible,
+.project-card:focus-within,
+.source-card:focus-within {
+  border-color: rgba(15, 143, 131, 0.42);
+  box-shadow:
+    0 0 0 3px rgba(15, 143, 131, 0.14),
+    0 12px 28px rgba(15, 32, 51, 0.08);
+}
+
+@keyframes atlasSweep {
+  0%,
+  55% {
+    opacity: 0;
+    transform: translateX(-70%);
+  }
+
+  70% {
+    opacity: 0.55;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(145%);
+  }
+}
+
+@keyframes routeDash {
+  to {
+    stroke-dashoffset: -176;
+  }
 }
 
 .site-footer {

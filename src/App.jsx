@@ -26,6 +26,7 @@ import { labels } from "./data/labels";
 import { projectTracks, projects } from "./data/projects";
 import { stages } from "./data/stages";
 import { useCoursePlannerWorker } from "./hooks/useCoursePlannerWorker";
+import { useDynamicUi } from "./hooks/useDynamicUi";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { PROJECT_STATUSES } from "./utils/projectStatus";
 import { createStudyLogState, mergeStudyLogEntries, migrateStudyLogState } from "./utils/studyLog";
@@ -107,6 +108,8 @@ export function App({ pageId = PAGE_IDS.home }) {
   const showDisciplineMap = pageId === PAGE_IDS.tracks;
   const showProjects = pageId === PAGE_IDS.projects;
   const showSources = pageId === PAGE_IDS.sources;
+
+  useDynamicUi(pageId);
 
   useEffect(() => {
     const queryLang = new URLSearchParams(window.location.search).get("lang");

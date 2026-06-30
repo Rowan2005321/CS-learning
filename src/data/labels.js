@@ -1,6 +1,6 @@
 export const labels = {
   en: {
-    nav: ["Roadmap", "Account", "Courses", "Study Log", "Tracks", "Projects", "Sources"],
+    nav: ["Roadmap", "Courses", "Study Log", "Tracks", "Projects", "Sources"],
     heroTitle: "Build a real computer science foundation from open courses",
     heroValue: "A computer science self-study map made for Chinese learners",
     heroSubtitle:
@@ -275,7 +275,7 @@ export const labels = {
     }
   },
   zh: {
-    nav: ["路线图", "账号", "课程", "学习记录", "方向", "项目", "来源"],
+    nav: ["路线图", "课程", "学习记录", "方向", "项目", "来源"],
     heroTitle: "为中文学习者整理的计算机科学自学地图",
     heroValue: "从零基础到能做项目、能面试、能继续深造的路线规划器",
     heroSubtitle: "把公开课程、开放教材和项目里程碑整理成可执行的 CS 学习计划。",
